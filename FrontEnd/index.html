@@ -18,7 +18,7 @@
             
             <nav class="sidebar-menu">
                 <div class="menu-item-link active" id="tab-pos" onclick="switchTab('pos')">
-                    <span class="icon">🛒</span> Pemesanan (POS)
+                    <span class="icon">🛒</span> Pemesanan
                 </div>
                 <div class="menu-item-link" id="tab-status" onclick="switchTab('status')">
                     <span class="icon">🍳</span> Status Dapur
@@ -49,10 +49,7 @@
                         <label>Password</label>
                         <input type="password" id="password" class="form-control" placeholder="Masukkan password">
                     </div>
-                    <button class="btn-block" onclick="login()">Masuk ke Sistem</button>
-                    <div class="auth-hint">
-                        💡 Owner: owner55 (owner123) | Kasir: kasir55 (kasir123)
-                    </div>
+                    <button class="btn-block" onclick="login()">Masuk ke Sistem</button>                    
                 </div>
             </div>
 
@@ -63,7 +60,7 @@
                             <button class="cat-btn active" onclick="filterCategory('Semua', this)">Semua Menu</button>
                             <button class="cat-btn" onclick="filterCategory('Makanan', this)">Makanan</button>
                             <button class="cat-btn" onclick="filterCategory('Minuman', this)">Minuman</button>
-                            <button class="cat-btn" onclick="filterCategory('Camilan', this)">Camilan</button>
+                            <button class="cat-btn" onclick="filterCategory('Snack', this)">Snack</button>
                         </div>
                         <div class="menu-list" id="pos-menu-render">
                             </div>
@@ -88,8 +85,7 @@
                         </div>
 
                         <div id="qris-payment-box" style="display: none; text-align: center; border: 1px solid #ddd; padding: 10px; margin-bottom: 15px; background: #fafafa;">
-                            <p style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">PINDAI QRIS CAFE CP 55</p>
-                            <div style="background: #333; color: white; width: 130px; height: 130px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">QR CODE CP 55</div>
+                            <img src="qr-warkop.jpeg" alt="QRIS Cafe CP 55" style="width: 150px; height: 150px; display: block; margin: 0 auto; border: 1px solid #eee; padding: 5px; background: #fff;">
                         </div>
 
                         <div class="cart-total">
@@ -169,7 +165,7 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                         <div>
-                            <h3>Buku Rekapitulasi Keuangan Bulanan (FR-09)</h3>
+                            <h3>Buku Rekapitulasi Keuangan Bulanan</h3>
                             <p style="font-size: 0.85rem; color: #e67e22; font-weight: bold; margin-top: 2px;">⚠️ Sistem otomatis menyimpan data selama 1 bulan berjalan.</p>
                         </div>
                         <button class="btn-action" style="background: #2980b9; color: white; padding: 10px 15px; font-size: 0.9rem; border-radius: 6px;" onclick="downloadRecapCSV()">💾 Unduh Arsip (.CSV)</button>
@@ -192,7 +188,7 @@
                 </div>
 
                 <div class="card">
-                    <h3>Form Catat Pengeluaran Operasional (FR-08)</h3>
+                    <h3>Form Catat Pengeluaran Operasional</h3>
                     <div class="form-row-owner">
                         <div class="form-group-inline" style="flex: 2;">
                             <label>Keterangan Pengeluaran</label>

@@ -1,11 +1,20 @@
-// --- DATA INITIAL SEED ---
+// --- DATA INITIAL SEED (15 VARIASI MENU BARU CAFE CP 55) ---
 const DEFAULT_PRODUCTS = [
-    { id: 1, name: "Kopi Hitam CP", price: 4000, stock: 15, isBest: true, category: "Minuman" },
-    { id: 2, name: "Es Nutrisari Jeruk", price: 5000, stock: 8, isBest: true, category: "Minuman" },
-    { id: 3, name: "Susu Gantung Anget", price: 6000, stock: 4, isBest: false, category: "Minuman" },
-    { id: 4, name: "Indomie Goreng + Telur", price: 10000, stock: 12, isBest: true, category: "Makanan" },
-    { id: 5, name: "Gorengan Renyah", price: 1000, stock: 25, isBest: false, category: "Camilan" },
-    { id: 6, name: "Rokok Surya (Ecer)", price: 2500, stock: 30, isBest: false, category: "Camilan" }
+    { id: 1, name: "Kopi Hitam (Murni)", price: 5000, stock: 100, isBest: false, category: "Minuman" },
+    { id: 2, name: "Kopi Susu Instan", price: 7000, stock: 80, isBest: true, category: "Minuman" },
+    { id: 3, name: "Es Teh Manis Jumbo", price: 4000, stock: 150, isBest: true, category: "Minuman" },
+    { id: 4, name: "Nutrisari Es (Susu/Jeruk)", price: 5000, stock: 60, isBest: false, category: "Minuman" },
+    { id: 5, name: "Susu Jahe Hangat (STMJ)", price: 8000, stock: 40, isBest: false, category: "Minuman" },
+    { id: 6, name: "Gorengan Anget (Goreng Sendiri)", price: 2000, stock: 200, isBest: true, category: "Snack" },
+    { id: 7, name: "Tempe Mendoan Porsi (Isi 4)", price: 8000, stock: 30, isBest: true, category: "Snack" },
+    { id: 8, name: "Kentang Goreng Curah", price: 10000, stock: 40, isBest: false, category: "Snack" },
+    { id: 9, name: "Cireng Goreng Bumbu Rujak", price: 10000, stock: 35, isBest: false, category: "Snack" },
+    { id: 10, name: "Roti Bakar Indomilk", price: 12000, stock: 25, isBest: false, category: "Snack" },
+    { id: 11, name: "Indomie Goreng Tante (Tanpa Telur)", price: 8000, stock: 100, isBest: false, category: "Makanan" },
+    { id: 12, name: "Indomie Rebus Telur Intermesem", price: 12000, stock: 80, isBest: true, category: "Makanan" },
+    { id: 13, name: "Nasi Kucing / Nasi Bungkus", price: 6000, stock: 50, isBest: true, category: "Makanan" },
+    { id: 14, name: "Nasi Goreng Mawut Warkop", price: 15000, stock: 30, isBest: false, category: "Makanan" },
+    { id: 15, name: "Magelangan (Mie + Nasi)", price: 16000, stock: 30, isBest: true, category: "Makanan" }
 ];
 
 let state = {
@@ -20,6 +29,7 @@ let state = {
 
 // --- RUN SYSTEM WITH CYCLIC CHECKER ---
 window.onload = function() {
+    // Jalankan pengecekan jika lokal storage kosong, maka isi dengan 15 data di atas
     if(!localStorage.getItem('cp55_products')) {
         localStorage.setItem('cp55_products', JSON.stringify(DEFAULT_PRODUCTS));
     }
@@ -157,14 +167,14 @@ function logout() {
 function showLoginLayout() {
     document.getElementById('page-login').style.display = 'block';
     document.getElementById('app-sidebar').style.display = 'none';
-    document.querySelector('.main-content').style.marginLeft = '0'; // Tanpa jarak sidebar
+    document.querySelector('.main-content').style.marginLeft = '0';
     switchTab('login');
 }
 
 function showMainLayout() {
     document.getElementById('page-login').style.display = 'none';
     document.getElementById('app-sidebar').style.display = 'flex';
-    document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)'; // Beri jarak selebar sidebar
+    document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)';
     document.getElementById('current-role').innerText = state.currentUser;
 
     const ownerTab = document.getElementById('tab-owner');
