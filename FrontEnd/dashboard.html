@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Dashboard - Cafe CP 55</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        /* Layout Utama Dashboard Internal */
+        body {
+            background-color: var(--bg-primary);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Sidebar Samping Kiri */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-surface);
+            border-right: 2px solid #2a2a2a;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand h2 {
+            color: var(--color-brand);
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background-color: var(--color-success);
+            color: #000;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background-color: var(--bg-surface-hover);
+            color: var(--color-brand);
+        }
+
+        .btn-logout {
+            margin-top: auto;
+            background-color: #c0392b;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #e74c3c;
+        }
+
+        /* Area Konten Utama Sebelah Kanan */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-section {
+            display: none; /* Dikontrol ganti-ganti via JS */
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        .section-title {
+            color: var(--color-brand);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2a2a2a;
+            padding-bottom: 10px;
+        }
+
+        /* Grid Komponen Statistik Angka Mini */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card-stat {
+            background-color: var(--bg-surface);
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .card-stat h3 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--color-brand);
+        }
+
+        .card-stat p {
+            margin: 5px 0 0 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2>Cafe CP 55</h2>
+            <span id="current-role" class="role-badge">Kasir</span>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div id="tab-pos" class="menu-link active" onclick="switchTab('pos')">🛒 Pemesanan</div>
+            <div id="tab-dapur" class="menu-link" onclick="switchTab('dapur')">🍳 Status Dapur</div>
+            <div id="tab-history" class="menu-link" onclick="switchTab('history')">📄 Riwayat Nota</div>
+            <div id="tab-owner" class="menu-link" onclick="switchTab('owner')" style="display: none;">📊 Panel Owner</div>
+        </div>
+
+        <button class="btn-logout" onclick="handleLogout()">Keluar Sistem</button>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="sec-pos" class="dashboard-section active">
+            <h2 class="section-title">🛒 Menu Utama Transaksi Kasir</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Gunakan tombol di bawah ini untuk membuka layar pemesanan utama pelanggan untuk menginput orderan baru.</p>
+            <button class="btn btn-brand" style="padding: 14px 24px; font-size: 1rem;" onclick="window.open('index.html', '_blank')">
+                📱 Buka Layar Kasir / Order POS
+            </button>
+        </div>
+
+        <div id="sec-dapur" class="dashboard-section">
+            <h2 class="section-title">🍳 Monitor Antrean Dapur</h2>
+            <div class="info-grid">
+                <div class="card-stat">
+                    <h3 id="stat-antre">2</h3>
+                    <p>Pesanan Antre</p>
+                </div>
+                <div class="card-stat">
+                    <h3 id="stat-masak" style="color: var(--color-success);">1</h3>
+                    <p>Sedang Dimasak</p>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary);">Fitur pemantauan pesanan real-time dari kasir ke bagian dapur masakan...</p>
+        </div>
+
+        <div id="sec-history" class="dashboard-section">
+            <h2 class="section-title">📄 Rekap Riwayat Nota Digital</h2>
+            <p style="color: var(--text-secondary);">Daftar arsip seluruh transaksi sukses yang diterbitkan oleh sistem kasir.</p>
+        </div>
+
+        <div id="sec-owner" class="dashboard-section">
+            <h2 class="section-title">📊 Panel Owner (Manajemen Finansial & Stok)</h2>
+            <div class="info-grid">
+                <div class="card-stat">
+                    <h3 style="color: var(--color-success);">Rp 450.000</h3>
+                    <p>Pendapatan Hari Ini</p>
+                </div>
+                <div class="card-stat">
+                    <h3 style="color: var(--color-accent);">12 Pcs</h3>
+                    <p>Stok Bahan Baku Menipis (&lt; 5)</p>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary);">Halaman otorisasi owner untuk melacak manajemen supply rantai stok dan rekap laba rugi bulanan warkop modern.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Jalankan validasi hak akses saat halaman selesai dimuat browser
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userRole = localStorage.getItem('role') || 'Kasir';
+
+            // Proteksi halaman: Tendang balik ke login.html kalau belum login/tembak url langsung
+            if (isLoggedIn !== 'true') {
+                alert("Akses ditolak! Silahkan login terlebih dahulu.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Pasang nama role aktif pada badge sidebar
+            document.getElementById('current-role').innerText = userRole;
+
+            // Jika akun yang masuk bertindak sebagai Owner, buka akses Panel Owner rahasia
+            if (userRole === 'Owner') {
+                document.getElementById('tab-owner').style.display = 'flex';
+                document.getElementById('current-role').style.backgroundColor = 'var(--color-brand)';
+                document.getElementById('current-role').style.color = '#000000';
+            }
+        });
+
+        // Logika Perpindahan Tab Menu Dashboard Internal
+        function switchTab(targetTab) {
+            // Bersihkan status kelas active dari menu navigasi lama
+            document.querySelectorAll('.menu-link').forEach(link => link.classList.remove('active'));
+            // Sembunyikan semua kontainer section isi konten kanan
+            document.querySelectorAll('.dashboard-section').forEach(sec => sec.classList.remove('active'));
+
+            // Aktifkan tab klik pilihan baru
+            document.getElementById('tab-' + targetTab).classList.add('active');
+            document.getElementById('sec-' + targetTab).classList.add('active');
+        }
+
+        // Fungsi Tombol Logout (Membersihkan session penyimpanan lokal)
+        function handleLogout() {
+            localStorage.clear();
+            alert("Berhasil keluar dari sistem internal Cafe CP 55.");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>

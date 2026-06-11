@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Staff - Cafe CP 55</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        /* Desain Form Login Menyesuaikan Foto Tampilan */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--bg-primary);
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .login-card {
+            background-color: var(--bg-surface);
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 400px;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-top: 5px solid var(--color-brand);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            color: var(--color-brand);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-primary);
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: var(--color-brand);
+            box-shadow: 0 0 5px rgba(255, 159, 28, 0.2);
+        }
+
+        .btn-login-block {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            margin-top: 10px;
+            border-radius: 8px;
+            background-color: var(--color-brand);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login-block:hover {
+            background-color: #e68a00;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .alert-error {
+            background-color: rgba(255, 77, 77, 0.15);
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-header">
+            <h2>STAFF PORTAL</h2>
+            <p>Cafe CP 55 - Sistem Manajemen Internal</p>
+        </div>
+
+        <div id="error-box" class="alert-error"></div>
+
+        <form id="formLogin">
+            <div class="form-group">
+                <label for="username">Username Staf :</label>
+                <input type="text" id="username" class="input-box" placeholder="Masukkan username..." required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password Akun :</label>
+                <input type="password" id="password" class="input-box" placeholder="Masukkan password..." required>
+            </div>
+
+            <button type="submit" id="btnLogin" class="btn-login-block">
+                Masuk ke Sistem Dashboard
+            </button>
+        </form>
+
+        <div class="login-footer">
+            &copy; 2026 Cafe CP 55 Gresik. All Rights Reserved.
+        </div>
+    </div>
+
+    <script>
+        // 1. Mengunci elemen tombol login dari HTML
+        const tombolLogin = document.getElementById('btnLogin');
+        const errorBox = document.getElementById('error-box');
+
+        // 2. Mengatur apa yang terjadi saat tombol diklik
+        tombolLogin.addEventListener('click', async (e) => {
+            e.preventDefault(); // Mencegah browser refresh halaman otomatis
+
+            // Ambil teks yang diketik oleh user
+            const usernameInput = document.getElementById('username').value.trim();
+            const passwordInput = document.getElementById('password').value;
+
+            // Validasi dasar: tidak boleh ada kotak yang kosong
+            if (!usernameInput || !passwordInput) {
+                errorBox.innerText = "Username dan Password wajib diisi!";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            try {
+                // 3. Menembak API FastAPI yang sedang menyala di port 8000
+                const response = await fetch('http://127.0.0.1:8000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: usernameInput,
+                        password: passwordInput
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    errorBox.style.display = 'none';
+                    
+                    // Simpan data login dari API (misal token atau role) ke sessionStorage
+                    localStorage.setItem('token', data.token || '');
+                    localStorage.setItem('role', data.role || 'Kasir'); 
+                    localStorage.setItem('isLoggedIn', 'true');
+
+                    alert("Login berhasil! Selamat bekerja di Cafe CP 55.");
+                    
+                    // Alihkan langsung ke halaman utama sistem kasir/dashboard
+                    window.location.href = "index.html";
+                } else {
+                    // Tampilkan pesan error kiriman dari back-end FastAPI
+                    errorBox.innerText = data.detail || "Username atau Password salah, jal!";
+                    errorBox.style.display = 'block';
+                    document.getElementById('password').value = ''; // Kosongkan field password
+                }
+
+            } catch (error) {
+                console.error("Error API:", error);
+                errorBox.innerText = "Gagal terhubung ke server FastAPI port 8000!";
+                errorBox.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
