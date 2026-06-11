@@ -267,5 +267,5 @@ th { background-color: #f8fafc; font-weight: bold; color: var(--primary); }
 }
 /* --- TRICK KHUSUS UNTUK MENYAMAKAN JARAK IKON PANEL OWNER --- */
 #tab-owner .icon {
-    margin-right: 10.5px; /* Memberikan dorongan spasi kecil khusus untuk emoji grafik batang */
+    margin-right: 11px; /* Memberikan dorongan spasi kecil khusus untuk emoji grafik batang */
 }
