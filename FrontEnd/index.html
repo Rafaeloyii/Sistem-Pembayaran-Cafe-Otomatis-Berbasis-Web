@@ -4,99 +4,361 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Pemesanan - Cafe CP 55</title>
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/pelanggan.css">
-    <link rel="stylesheet" href="css/modal-checkout.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Penyesuaian Grid agar sisi Checkout lebih ramping */
+        .pos-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 25px;
+            align-items: start;
+        }
+        @media (max-width: 991px) {
+            .pos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Container Grafik Tren Harian */
+        .daily-chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .daily-chart-row {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .daily-chart-date {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .daily-bar-wrapper {
+            display: grid;
+            grid-template-columns: 80px 1fr 100px;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .daily-bar-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .daily-bar-track {
+            background: #e9ecef;
+            height: 14px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .daily-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .daily-bar-val {
+            font-size: 0.8rem;
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="desktop-container">
+    <div class="app-wrapper">
         
-        <div class="katalog-panel">
-            <div class="warkop-header">
-                <h1>CAFE CP 55</h1>
-                <p>Silahkan Pilih Kategori dan Tambahkan Menu ke Keranjang</p>
+        <aside id="app-sidebar" class="sidebar" style="display: none;">
+            <div class="sidebar-brand">
+                <h2>Cafe CP 55</h2>
+                <span class="role-badge" id="current-role">Guest</span>
             </div>
-
-            <nav>
-                <button id="btn-cat-all" class="btn btn-nav-cat" onclick="filterKategori('all')">👁️ Semua Menu</button>
-                <button id="btn-cat-makanan" class="btn btn-nav-cat" onclick="filterKategori('makanan')">🍳 Makanan</button>
-                <button id="btn-cat-minuman" class="btn btn-nav-cat" onclick="filterKategori('minuman')">☕ Minuman</button>
-                <button id="btn-cat-cemilan" class="btn btn-nav-cat" onclick="filterKategori('cemilan')">🍟 Cemilan</button>
-            </nav>
-
-            <div id="sec-makanan" class="menu-section">
-                <h2 class="category-title">🍳 Makanan</h2>
-                <div id="makanan-container"></div>
-            </div>
-
-            <div id="sec-minuman" class="menu-section">
-                <h2 class="category-title">☕ Minuman</h2>
-                <div id="minuman-container"></div>
-            </div>
-
-            <div id="sec-cemilan" class="menu-section">
-                <h2 class="category-title">🍟 Cemilan</h2>
-                <div id="cemilan-container"></div>
-            </div>
-        </div>
-
-        <div class="cart-panel">
-            <h3 class="panel-title">🛒 Keranjang Belanja</h3>
             
-            <div class="cart-scroll-area">
+            <nav class="sidebar-menu" id="sidebar-menu-items"></nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-logout-sidebar" onclick="logout()">Logout 🚪</button>
+            </div>
+        </aside>
+
+        <main class="main-content" id="main-container">
+
+            <div id="page-pembeli" class="page active">
+                <div class="pembeli-header">
+                    <div class="header-titles">
+                        <h1>Cafe CP 55 ☕</h1>
+                        <p>Pelayanan Sat-Set, Cita Rasa Mantap!</p>
+                    </div>
+                    <button class="btn-login-trigger" onclick="switchTab('login')">Akses Staf 🔑</button>
+                </div>
                 
-                <div id="live-cart-items">
-                    <p class="empty-text">Belum ada menu yang dipilih.</p>
+                <div class="pos-grid">
+                    <div class="menu-section">
+                        <div class="category-tabs">
+                            <button class="cat-btn active" onclick="filterCategory('Semua', this)">Semua Menu</button>
+                            <button class="cat-btn" onclick="filterCategory('Makanan', this)">Makanan</button>
+                            <button class="cat-btn" onclick="filterCategory('Minuman', this)">Minuman</button>
+                            <button class="cat-btn" onclick="filterCategory('Snack', this)">Snack</button>
+                        </div>
+                        <div class="menu-grid" id="pos-menu-render"></div>
+                    </div>
+
+                    <div class="cart-section">
+                        <h3 class="cart-title">🛒 Keranjang Belanja</h3>
+                        <div class="form-group">
+                            <label>Nama Pembeli</label>
+                            <input type="text" id="cart-customer-name" class="form-control" placeholder="Tulis nama Anda...">
+                        </div>
+                        
+                        <div id="cart-items-list" class="cart-items-container"></div>
+
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label>Catatan Tambahan</label>
+                            <input type="text" id="cart-cashier-notes" class="form-control" placeholder="Contoh: Es teh manis plastik, mi pedas...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Metode Pembayaran</label>
+                            <select id="cart-payment-method" class="form-control" onchange="togglePaymentLayout()">
+                                <option value="cash">Cash (Tunai)</option>
+                                <option value="qris">QRIS (Digital QR Code)</option>
+                            </select>
+                        </div>
+
+                        <div id="qris-payment-box" style="display: none;">
+                            <div class="qris-card">
+                                <img src="qr-warkop.jpeg" alt="QRIS Cafe CP 55">
+                                <p>Silakan pindai kode QR di atas untuk menyelesaikan pembayaran digital.</p>
+                            </div>
+                        </div>
+
+                        <div class="cart-total">
+                            <span>Total Pembayaran:</span>
+                            <span id="cart-grand-total">Rp 0</span>
+                        </div>
+
+                        <button class="btn-block btn-checkout" onclick="checkoutOrder()">Proses & Kirim Pesanan 🚀</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-login" class="page">
+                <div class="auth-container">
+                    <div class="auth-icon">🔐</div>
+                    <h2>Login Sistem</h2>
+                    <p class="auth-subtitle">Kelola operasional dan keuangan cafe</p>
+                    
+                    <div id="mobile-notice" class="mobile-badge-info" style="display: none;">
+                        📱 <strong>Mode Mobile Aktif:</strong> Hanya akses akun <strong>Owner</strong> yang diperbolehkan dari perangkat ini.
+                    </div>
+
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="username" class="form-control" placeholder="Masukkan username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Masukkan password">
+                    </div>
+                    <button class="btn-block btn-login-action" onclick="login()">Masuk ke Sistem</button>                    
+                    <button class="btn-block btn-back-action" onclick="backToPembeli()">Kembali Jadi Pembeli</button>
+                </div>
+            </div>
+
+            <div id="page-status" class="page">
+                <div class="card">
+                    <h3>Pelacakan Status & Antrean Dapur</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Daftar antrean satu pintu untuk koordinasi tim penyaji menu.</p>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nota ID</th>
+                                    <th>Nama Pelanggan</th>
+                                    <th>Pesanan</th>
+                                    <th>Metode</th>
+                                    <th>Status Pengerjaan</th>
+                                    <th>Aksi Operasional</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-kitchen-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-history" class="page">
+                <div class="card">
+                    <h3>Riwayat Pemesanan & Nota Transaksi</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Waktu</th>
+                                    <th>Nota ID</th>
+                                    <th>Pelanggan</th>
+                                    <th>Total Pembayaran</th>
+                                    <th>Metode</th>
+                                    <th>Detail Nota</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-history-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-owner-summary" class="page">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                    <div class="card" style="background: #2c3e50; color: white; border-left: 5px solid #2ecc71; margin-bottom: 0;">
+                        <h4 style="color: #bdc3c7; font-size: 0.9rem; text-transform: uppercase;">Pemasukan Bulan Ini</h4>
+                        <h2 id="owner-revenue-display" style="font-size: 2rem; margin-top: 5px; color: #2ecc71;">Rp 0</h2>
+                    </div>
+                    <div class="card" style="background: #2c3e50; color: white; border-left: 5px solid #e74c3c; margin-bottom: 0;">
+                        <h4 style="color: #bdc3c7; font-size: 0.9rem; text-transform: uppercase;">Pengeluaran Bulan Ini</h4>
+                        <h2 id="owner-expenses-display" style="font-size: 2rem; margin-top: 5px; color: #e74c3c;">Rp 0</h2>
+                    </div>
+                    <div class="card" style="background: #2c3e50; color: white; border-left: 5px solid #1abc9c; margin-bottom: 0;">
+                        <h4 style="color: #bdc3c7; font-size: 0.9rem; text-transform: uppercase;">Pendapatan Bersih</h4>
+                        <h2 id="owner-net-profit-display" style="font-size: 2rem; margin-top: 5px; color: #1abc9c;">Rp 0</h2>
+                    </div>
                 </div>
 
-                <div class="cart-form">
-                    <div class="form-group">
-                        <label>Nama Pembeli:</label>
-                        <input type="text" id="buyer-name" class="form-input" placeholder="Masukkan nama Anda...">
+                <div class="card">
+                    <h3>Grafik Tren Finansial Per Hari (Bulan Ini)</h3>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Pelacakan perbandingan finansial real-time yang diperbarui harian.</p>
+                    <div id="daily-charts-render-zone" class="daily-chart-container"></div>
+                </div>
+            </div>
+
+            <div id="page-owner-recap" class="page">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <h3>Buku Rekapitulasi Keuangan Bulanan</h3>
+                            <p style="font-size: 0.85rem; color: #e67e22; font-weight: bold; margin-top: 2px;">⚠️ Sistem otomatis menyimpan data selama 1 bulan berjalan.</p>
+                        </div>
+                        <button class="btn-action" style="background: #2980b9; color: white; padding: 10px 15px; font-size: 0.9rem; border-radius: 6px;" onclick="downloadRecapCSV()">💾 Unduh Arsip (.CSV)</button>
                     </div>
-                    <div class="form-group">
-                        <label>Catatan (Opsional):</label>
-                        <input type="text" id="order-notes" class="form-input" placeholder="Contoh: pedas manis, kopi pisah...">
+                    <div style="overflow-x: auto; margin-top: 15px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hari, Tanggal</th>
+                                    <th>Pemasukan Kotor</th>
+                                    <th>Total Pengeluaran</th>
+                                    <th>Pendapatan Bersih</th>
+                                    <th>Status Siklus</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-recap-body"></tbody>
+                        </table>
                     </div>
-                    
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label>Metode Pembayaran (Wajib Di Awal):</label>
-                        <div style="display: flex; gap: 10px; margin-top: 5px;">
-                            <button id="btn-pay-cash" class="btn" style="flex: 1; background: #333; color: white;" onclick="pilihMetodeBayar('CASH')">💵 CASH</button>
-                            <button id="btn-pay-qris" class="btn" style="flex: 1; background: #333; color: white;" onclick="pilihMetodeBayar('QRIS')">📱 QRIS</button>
+                </div>
+            </div>
+
+            <div id="page-owner-expense" class="page">
+                <div class="card">
+                    <h3>Form Catat Pengeluaran Operasional</h3>
+                    <div class="form-row-owner">
+                        <div class="form-group-inline" style="flex: 2;">
+                            <label>Nama Barang / Keperluan</label>
+                            <input type="text" id="expense-desc" class="form-control" placeholder="Contoh: Beli Tabung Gas LPG / Es Batu">
+                        </div>
+                        <div class="form-group-inline" style="flex: 1;">
+                            <label>Harga / Nominal (Rp)</label>
+                            <input type="number" id="expense-amount" class="form-control" placeholder="22000">
+                        </div>
+                        <div class="form-group-inline btn-container-inline" style="flex: 1;">
+                            <button class="btn-block" style="background-color: var(--accent); margin-top: 0;" onclick="addExpenseByOwner()">Catat & Simpan</button>
                         </div>
                     </div>
+                </div>
 
-                    <div id="qris-box-area" style="display: none; background: #fff; padding: 12px; border-radius: 8px; text-align: center; margin-top: 12px; border: 2px solid var(--color-brand);">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CafeCP55" alt="QRIS CP 55" style="width: 130px; height: 130px;">
-                        <p style="color: #000; font-weight: bold; font-size: 0.85rem; margin-top: 6px; font-family: sans-serif;">NMID: ID102026XXXXX<br>CAFE CP 55 GRESIK</p>
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Daftar Riwayat Pengeluaran Barang (Bulan Ini)</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal & Waktu</th>
+                                    <th>Nama Barang / Keperluan</th>
+                                    <th>Nominal Pengeluaran</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-expense-body"></tbody>
+                        </table>
                     </div>
                 </div>
-
-            </div> <div class="cart-summary">
-                <div class="total-row">
-                    <span>Total Bayar:</span>
-                    <span id="cart-total-price">Rp 0</span>
-                </div>
-                <button class="btn btn-brand btn-checkout-block" onclick="prosesKeNotaDigital()">
-                    Konfirmasi & Proses Pesanan
-                </button>
             </div>
-        </div>
 
+            <div id="page-owner-addmenu" class="page">
+                <div class="card">
+                    <h3>Tambah Variasi Menu Baru</h3>
+                    <div class="form-row-owner">
+                        <div class="form-group-inline">
+                            <label>Nama Menu</label>
+                            <input type="text" id="new-menu-name" class="form-control" placeholder="Contoh: Es Teh Tarik">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Kategori</label>
+                            <select id="new-menu-category" class="form-control">
+                                <option value="Minuman">Minuman</option>
+                                <option value="Makanan">Makanan</option>
+                                <option value="Snack">Snack</option> </select>
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Harga (Rp)</label>
+                            <input type="number" id="new-menu-price" class="form-control" placeholder="5000">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Stok Awal</label>
+                            <input type="number" id="new-menu-stock" class="form-control" placeholder="20">
+                        </div>
+                        <div class="form-group-inline btn-container-inline">
+                            <button class="btn-block" style="background-color: var(--secondary); margin-top: 0;" onclick="addNewMenuByOwner()">+ Tambah Menu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-owner-stock" class="page">
+                <div class="card">
+                    <h3>Manajemen Suplai Stok Bahan Baku</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Menu / Bahan</th>
+                                    <th>Kategori</th>
+                                    <th>Harga</th>
+                                    <th>Stok Tersedia</th>
+                                    <th>Aksi Tambah Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-stock-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <div id="modal-nota" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header" style="text-align: center; color: var(--color-success);">🎉 PESANAN BERHASIL!</div>
-            <div id="print-area-nota" class="digital-receipt-wrapper"></div>
-            <button class="btn btn-brand" style="width: 100%; padding: 12px; font-size: 1rem;" onclick="selesaiTransaksi()">
-                Selesai & Reset Menu
-            </button>
+    <div id="modal-receipt" class="modal">
+        <div class="modal-content receipt-modal-box">
+            <div class="digital-receipt-wrapper" id="receipt-print-area"></div>
+            <button class="btn-block btn-close-receipt" onclick="closeReceiptModal()">Tutup & Selesai</button>
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
