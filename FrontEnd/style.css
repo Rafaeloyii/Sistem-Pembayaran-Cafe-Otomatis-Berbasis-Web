@@ -1,15 +1,15 @@
 :root {
-    --primary: #2c3e50;
-    --primary-light: #34495e;
-    --secondary: #16a085;
-    --secondary-hover: #117a65;
-    --accent: #e74c3c;
-    --bg: #f4f6f9;
-    --text: #2c3e50;
-    --text-muted: #7f8c8d;
-    --card-bg: #ffffff;
+    --primary: #3d2b1f;           /* Cokelat Kopi Tua (untuk Sidebar & Header) */
+    --primary-light: #523a2a;     /* Kopi Medium (untuk Hover Sidebar) */
+    --secondary: #b5825d;         /* Caramel/Kayu Hangat (untuk Tombol Utama & Aksi) */
+    --secondary-hover: #9c6d49;   /* Deep Caramel */
+    --accent: #d9534f;            /* Merah Terracotta Lembut (untuk Label Stok Menipis/Batal) */
+    --bg: #fdfbf7;                /* Warm White/Krim Sangat Muda (Latar belakang aplikasi) */
+    --text: #2b2521;              /* Cokelat Arang Gelap (agar Teks tidak sekaku Hitam murni) */
+    --text-muted: #8e8076;        /* Latte/Abu-abu Kecokelatan */
+    --card-bg: #ffffff;           /* Putih Bersih untuk Kartu Menu */
     --sidebar-width: 260px;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 12px rgba(61, 43, 31, 0.06); /* Shadow dengan tint cokelat tipis */
     --radius: 12px;
 }
 
@@ -138,15 +138,17 @@ body {
 
 /* UPGRADED PEMBELI HEADER */
 .pembeli-header {
+    background: linear-gradient(rgba(61, 43, 31, 0.85), rgba(61, 43, 31, 0.85)), 
+                url('bg.jpg') center/cover no-repeat;
+    color: white;
+    padding: 30px 20px;
+    border-radius: var(--radius);
+    text-align: left;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    padding: 25px 30px;
-    border-radius: var(--radius);
-    margin-bottom: 25px;
-    box-shadow: var(--shadow);
 }
 
 .pembeli-header h1 {
@@ -182,6 +184,9 @@ body {
     padding: 0;
     box-shadow: none;
     margin-bottom: 20px;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
 .category-tabs {
@@ -259,12 +264,12 @@ body {
 }
 
 .badge-best {
-    background: #f1c40f;
-    color: #333;
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: bold;
+    background-color: var(--secondary); /* Menggunakan warna Caramel/Oak dari palet baru */
+    color: white;
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 600;
 }
 
 .badge-low {
@@ -338,12 +343,24 @@ body {
     cursor: not-allowed;
 }
 
-/* CART CONTAINER STYLING */
 .cart-section {
     background: var(--card-bg);
     padding: 25px;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    position: sticky;
+    top: 20px; /* Menempel di atas pas di-scroll */
+    max-height: calc(100vh - 40px); /* Membatasi tinggi total keranjang agar pas selayar */
+    display: flex;
+    flex-direction: column;
+}
+
+/* KHUSUS DAFTAR ITEM: Ini yang bakal dapet scrollbar kalau belanjaan banyak */
+.cart-items-scroll-box {
+    max-height: 220px; /* Batas tinggi daftar item belanjaan, sesuaikan sesukamu */
+    overflow-y: auto;  /* Aktifkan scroll vertikal hanya di bagian item */
+    margin-bottom: 15px;
+    padding-right: 5px;
 }
 
 .cart-title {
@@ -535,4 +552,117 @@ th { background-color: #fafbfc; font-weight: bold; color: var(--primary); }
 @media (max-width: 768px) {
     .main-content { padding: 15px; }
     .pembeli-header { padding: 15px 20px; flex-direction: column; gap: 15px; text-align: center; }
+}
+
+/* TAMPILAN BARU UNTUK METODE PEMBAYARAN TINGGAL KLIK */
+.payment-method-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.pay-method-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--primary);
+    transition: all 0.2s ease;
+    gap: 6px;
+}
+
+.pay-method-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.pay-method-btn.active {
+    background: #e6f7f4;
+    border-color: var(--secondary);
+    color: var(--secondary-hover);
+    box-shadow: 0 4px 6px rgba(22, 160, 133, 0.08);
+}
+
+.pay-icon {
+    font-size: 1.4rem;
+}
+
+/* Pastikan style ini HANYA aktif saat halaman login sedang diberi class .active oleh JS */
+#page-login.active {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 60px); /* Membatasi tinggi agar tidak meluber */
+    width: 100%;
+    background-color: var(--bg);
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Kotak Border Utama (Split Antara Gambar & Form) */
+#page-login.active .login-split-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Membagi kiri dan kanan */
+    background-color: var(--card-bg);
+    border: 1px solid #e2e8f0; /* Border sistem login luar */
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    width: 100%;
+    max-width: 800px; /* Sedikit dikecilkan lebarnya agar makin pas */
+    margin: auto;
+}
+
+/* Sisi Kiri: Gambar Banner (Tingginya dikurangi agar lebih pendek/kecil) */
+#page-login.active .login-image-side {
+    background: url('login.jpg') center/cover no-repeat;
+    width: 100%;
+    height: 100%;
+    min-height: 380px; /* DIKECILKAN atas-bawahnya dari 450px ke 380px */
+}
+
+/* Sisi Kanan: Tempat Form Login (Padding atas-bawah dikurangi agar ramping) */
+#page-login.active .login-form-side {
+    padding: 25px 35px; /* Padding atas-bawah dikecilkan dari 40px ke 25px */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--card-bg);
+}
+
+/* Netralisir .auth-container bawaan khusus di dalam split login */
+#page-login.active .login-form-side .auth-container {
+    margin: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Responsif Layar HP */
+@media (max-width: 768px) {
+    #page-login.active .login-split-container { 
+        grid-template-columns: 1fr; 
+        max-width: 360px; 
+    }
+    #page-login.active .login-image-side { 
+        display: none; 
+    }
+}
+
+#page-kasir {
+    height: calc(100vh - 60px); /* Kunci tinggi halaman kasir agar pas satu layar */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Mencegah seluruh halaman ikut ter-scroll ke bawah */
 }

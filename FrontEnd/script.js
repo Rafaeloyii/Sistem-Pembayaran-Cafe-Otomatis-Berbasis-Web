@@ -357,6 +357,25 @@ function togglePaymentLayout() {
     document.getElementById('qris-payment-box').style.display = (method === 'qris') ? 'block' : 'none';
 }
 
+// FUNGSI BARU UNTUK MEMILIH METODE PEMBAYARAN VIA KLIK TOMBOL
+function selectPaymentMethod(method) {
+    // Set nilai ke input hidden agar fungsi checkout tidak patah/error
+    document.getElementById('cart-payment-method').value = method;
+    
+    // Hapus kelas active dari semua tombol metode pembayaran
+    document.getElementById('pay-btn-cash').classList.remove('active');
+    document.getElementById('pay-btn-qris').classList.remove('active');
+    
+    // Tambahkan kelas active ke tombol yang dipilih
+    if (method === 'cash') {
+        document.getElementById('pay-btn-cash').classList.add('active');
+        document.getElementById('qris-payment-box').style.display = 'none';
+    } else if (method === 'qris') {
+        document.getElementById('pay-btn-qris').classList.add('active');
+        document.getElementById('qris-payment-box').style.display = 'block';
+    }
+}
+
 function checkoutOrder() {
     const customerName = document.getElementById('cart-customer-name').value.trim();
     if(!customerName) { alert('⚠️ Silakan isi nama pembeli terlebih dahulu.'); return; }
@@ -394,6 +413,8 @@ function checkoutOrder() {
     document.getElementById('cart-cashier-notes').value = '';
     document.getElementById('cart-payment-method').value = 'cash';
     document.getElementById('qris-payment-box').style.display = 'none';
+    document.getElementById('pay-btn-cash').classList.add('active');
+    document.getElementById('pay-btn-qris').classList.remove('active');
     
     renderCart();
     renderPOSCatalog();
@@ -419,7 +440,7 @@ function openReceiptModal(order) {
     area.innerHTML = `
         <div class="receipt-header">
             <h4>CAFE CP 55</h4>
-            <p>Jl. Raya Universitas Internasional Semen Indonesia</p>
+            <p>Jl. Proklamasi No.55, Injen Barat, Pekauman, Kec. Gresik</p>
             <p>Gresik, Jawa Timur</p>
         </div>
         <div class="receipt-divider"></div>
