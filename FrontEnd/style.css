@@ -803,3 +803,84 @@ tr:hover { background-color: #f8fafc; }
         width: 100%;
     }
 }
+
+.mobile-topbar {
+    display: none; /* Sembunyi secara default di Desktop */
+    background: #ffffff;
+    padding: 12px 20px;
+    border-bottom: 1px solid #edf2f7;
+    align-items: center;
+    gap: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
+
+/* FIX: Menggunakan 'screen', bukan 'id' */
+@media screen and (max-width: 768px) {
+    .mobile-topbar {
+        display: flex; /* Muncul hanya di layar HP */
+    }
+
+    /* Paksa sidebar melayang di atas konten (Overlay) */
+    #app-sidebar {
+        position: fixed !important;
+        top: 0;
+        left: -100% !important; /* Sembunyi di luar layar kiri secara default */
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.15);
+    }
+
+    /* Class pemicu saat sidebar dibuka di HP */
+    #app-sidebar.mobile-open {
+        left: 0 !important;
+    }
+
+    /* Hilangkan margin kiri pada konten utama agar tidak tergeser keluar layar */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 15px !important;
+        width: 100% !important;
+        overflow-x: hidden;
+    }
+
+    /* Tombol pemicu sidebar di HP */
+    .hamburger-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    /* Perbaikan visual Grid Form agar tidak menyempit */
+    .form-inline-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .flex-1, .flex-2, .btn-align-bottom {
+        width: 100% !important;
+    }
+
+    /* Perbaikan visual Bar Chart Keuangan di HP agar pas di screen */
+    .daily-bar-wrapper {
+        grid-template-columns: 1fr !important; /* Jadikan satu baris vertikal ke bawah */
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+    
+    .daily-bar-track {
+        height: 12px;
+        width: 100% !important;
+    }
+    
+    .daily-chart-row {
+        padding: 8px;
+    }
+}

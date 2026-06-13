@@ -885,3 +885,31 @@ function restockItem(productId) {
         alert(`✔ Berhasil menambah stok untuk ${product.name}!`);
     }
 }
+
+// Fungsi pintar buka-tutup sidebar + auto tutup jika klik area luar sidebar di HP
+function toggleSidebar() {
+    const sidebar = document.getElementById('app-sidebar');
+    if (!sidebar) return;
+    
+    sidebar.classList.toggle('mobile-open');
+
+    // Jika sidebar terbuka di HP, dengarkan klik di area luar untuk auto-close
+    if (sidebar.classList.contains('mobile-open')) {
+        setTimeout(() => {
+            window.addEventListener('click', closeSidebarOnClickOutside);
+        }, 50);
+    } else {
+        window.removeEventListener('click', closeSidebarOnClickOutside);
+    }
+}
+
+function closeSidebarOnClickOutside(event) {
+    const sidebar = document.getElementById('app-sidebar');
+    const hamburgerBtn = document.querySelector('.hamburger-btn');
+    
+    // Jika yang diklik bukan area dalam sidebar dan bukan tombol hamburger, maka tutup sidebarnya
+    if (sidebar && !sidebar.contains(event.target) && hamburgerBtn && !hamburgerBtn.contains(event.target)) {
+        sidebar.classList.remove('mobile-open');
+        window.removeEventListener('click', closeSidebarOnClickOutside);
+    }
+}
