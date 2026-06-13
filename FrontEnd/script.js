@@ -1,20 +1,20 @@
 // --- DATA INITIAL SEED (15 VARIASI MENU BARU CAFE CP 55) ---
 const DEFAULT_PRODUCTS = [
-    { id: 1, name: "Kopi Hitam (Murni)", price: 5000, stock: 100, isBest: false, category: "Minuman" },
-    { id: 2, name: "Kopi Susu Instan", price: 7000, stock: 80, isBest: true, category: "Minuman" },
-    { id: 3, name: "Es Teh Manis Jumbo", price: 4000, stock: 150, isBest: true, category: "Minuman" },
-    { id: 4, name: "Nutrisari Es (Susu/Jeruk)", price: 5000, stock: 60, isBest: false, category: "Minuman" },
-    { id: 5, name: "Susu Jahe Hangat (STMJ)", price: 8000, stock: 40, isBest: false, category: "Minuman" },
-    { id: 6, name: "Gorengan Anget (Goreng Sendiri)", price: 2000, stock: 200, isBest: true, category: "Snack" },
-    { id: 7, name: "Tempe Mendoan Porsi (Isi 4)", price: 8000, stock: 30, isBest: true, category: "Snack" },
-    { id: 8, name: "Kentang Goreng Curah", price: 10000, stock: 40, isBest: false, category: "Snack" },
-    { id: 9, name: "Cireng Goreng Bumbu Rujak", price: 10000, stock: 35, isBest: false, category: "Snack" },
-    { id: 10, name: "Roti Bakar Indomilk", price: 12000, stock: 25, isBest: false, category: "Snack" },
-    { id: 11, name: "Indomie Goreng Tante (Tanpa Telur)", price: 8000, stock: 100, isBest: false, category: "Makanan" },
-    { id: 12, name: "Indomie Rebus Telur Intermesem", price: 12000, stock: 80, isBest: true, category: "Makanan" },
-    { id: 13, name: "Nasi Kucing / Nasi Bungkus", price: 6000, stock: 50, isBest: true, category: "Makanan" },
-    { id: 14, name: "Nasi Goreng Mawut Warkop", price: 15000, stock: 30, isBest: false, category: "Makanan" },
-    { id: 15, name: "Magelangan (Mie + Nasi)", price: 16000, stock: 30, isBest: true, category: "Makanan" }
+    { id: 1, name: "Kopi Hitam (Murni)", price: 5000, stock: 100, category: "Minuman" },
+    { id: 2, name: "Kopi Susu Instan", price: 7000, stock: 80, category: "Minuman" },
+    { id: 3, name: "Es Teh Manis Jumbo", price: 4000, stock: 150, category: "Minuman" },
+    { id: 4, name: "Nutrisari Es (Susu/Jeruk)", price: 5000, stock: 60, category: "Minuman" },
+    { id: 5, name: "Susu Jahe Hangat (STMJ)", price: 8000, stock: 40, category: "Minuman" },
+    { id: 6, name: "Gorengan", price: 2000, stock: 200, category: "Snack" },
+    { id: 7, name: "Tempe Mendoan Porsi (Isi 4)", price: 8000, stock: 30, category: "Snack" },
+    { id: 8, name: "Kentang Goreng Curah", price: 10000, stock: 40, category: "Snack" },
+    { id: 9, name: "Cireng Goreng Bumbu Rujak", price: 10000, stock: 35, category: "Snack" },
+    { id: 10, name: "Roti Bakar Indomilk", price: 12000, stock: 25, category: "Snack" },
+    { id: 11, name: "Indomie Goreng Tanpa Telur", price: 8000, stock: 100, category: "Makanan" },
+    { id: 12, name: "Indomie Rebus Telur Intermesem", price: 12000, stock: 80, category: "Makanan" },
+    { id: 13, name: "Nasi Kucing / Nasi Bungkus", price: 6000, stock: 50, category: "Makanan" },
+    { id: 14, name: "Nasi Goreng Mawut Warkop", price: 15000, stock: 30, category: "Makanan" },
+    { id: 15, name: "Magelangan (Mie + Nasi)", price: 16000, stock: 30, category: "Makanan" }
 ];
 
 let state = {
@@ -46,14 +46,13 @@ window.onload = function() {
     checkSession();
     handleMobileNoticeDisplay();
 
-    // Jalankan pengecekan ulang jika ukuran jendela browser diubah
     window.addEventListener('resize', handleMobileNoticeDisplay);
 }
 
 function loadDataFromStorage() {
     state.products = JSON.parse(localStorage.getItem('cp55_products'));
     state.orders = JSON.parse(localStorage.getItem('cp55_orders'));
-    state.expenses = JSON.parse(localStorage.getItem('cp55_expenses'));
+    state.expenses = JSON.parse(localStorage.getItem('cp55_expenses')) || [];
     state.dailyRecaps = JSON.parse(localStorage.getItem('cp55_daily_recaps'));
 }
 
@@ -97,7 +96,7 @@ function updateDailyRecapData() {
     
     let todayRevenue = 0;
     state.orders.forEach(o => {
-        if(o.dateKey === todaySimple || (!o.dateKey && o.time)) {
+        if(o.status === 'Completed' && (o.dateKey === todaySimple || (!o.dateKey && o.time))) {
             todayRevenue += o.total;
         }
     });
@@ -140,7 +139,6 @@ function downloadRecapCSV() {
     document.body.removeChild(link);
 }
 
-// --- LOGIC: MOBILE MODE RESTRICTIONS ---
 function handleMobileNoticeDisplay() {
     const notice = document.getElementById('mobile-notice');
     if(!notice) return;
@@ -151,7 +149,6 @@ function handleMobileNoticeDisplay() {
     }
 }
 
-// --- SESSION CONTROLLER ---
 function checkSession() {
     const savedUser = sessionStorage.getItem('cp55_session');
     if(savedUser) {
@@ -171,7 +168,6 @@ function login() {
     if(userIn === 'owner55' && passIn === 'owner123') {
         state.currentUser = 'Owner';
     } else if(userIn === 'kasir55' && passIn === 'kasir123') {
-        // Aturan Proteksi Mobile Mode (Owner Only)
         if(isMobile) {
             alert('❌ Akses Ditolak!\nAkun Kasir hanya bisa diakses via PC/Tablet untuk keperluan efisiensi monitor dapur.');
             return;
@@ -185,7 +181,6 @@ function login() {
     sessionStorage.setItem('cp55_session', state.currentUser);
     showMainLayout();
     
-    // Reset input form
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
 }
@@ -249,6 +244,13 @@ function showMainLayout() {
 
 function switchTab(tabName) {
     const pages = ['pembeli', 'login', 'status', 'history', 'owner-summary', 'owner-recap', 'owner-expense', 'owner-addmenu', 'owner-stock'];
+    
+    if (tabName === 'pembeli' || tabName === 'status') {
+        document.body.classList.add('pos-layout-active');
+    } else {
+        document.body.classList.remove('pos-layout-active');
+    }
+
     pages.forEach(p => {
         const element = document.getElementById(`page-${p}`);
         if(element) element.classList.remove('active');
@@ -263,19 +265,44 @@ function switchTab(tabName) {
     const activeTab = document.getElementById(`tab-${tabName}`);
     if(activeTab) activeTab.classList.add('active');
 
-    if(tabName === 'pembeli') renderPOSCatalog();
+    if(tabName === 'pembeli') {
+        renderPOSCatalog();
+        switchCartSubTab('list');
+    }
     if(tabName === 'status') renderKitchenDashboard();
     if(tabName === 'history') renderHistoryList();
     if(tabName.startsWith('owner-')) renderOwnerDashboard(tabName);
 }
 
-// --- PEMBELI / CATALOG ENGINE (MODERN GRID CARDS) ---
 function filterCategory(category, element) {
     state.selectedCategory = category;
     const buttons = document.querySelectorAll('.cat-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
     element.classList.add('active');
     renderPOSCatalog();
+}
+
+// OTOMATIS MEMASANG BADGE BEST SELLER BERDASARKAN QUANTITY YANG SELESAI DIJUAL
+function getBestSellerProductIds() {
+    let productSalesMap = {};
+    state.orders.forEach(o => {
+        if (o.status === 'Completed') {
+            o.items.forEach(item => {
+                if (!productSalesMap[item.id]) {
+                    productSalesMap[item.id] = 0;
+                }
+                productSalesMap[item.id] += item.qty;
+            });
+        }
+    });
+
+    let salesArray = Object.keys(productSalesMap).map(id => {
+        return { id: parseInt(id), qty: productSalesMap[id] };
+    });
+
+    salesArray.sort((a, b) => b.qty - a.qty);
+    // Mengambil top 3 item dengan penjualan tertinggi (hanya jika ada kuantitas terjual > 0)
+    return salesArray.filter(item => item.qty > 0).slice(0, 3).map(item => item.id);
 }
 
 function renderPOSCatalog() {
@@ -289,10 +316,13 @@ function renderPOSCatalog() {
         return;
     }
 
+    const bestSellers = getBestSellerProductIds();
+
     filtered.forEach(p => {
         const isLowStock = p.stock <= 5 && p.stock > 0;
         const isOut = p.stock === 0;
-        const bestBadge = p.isBest ? `<span class="badge-best">⭐ BEST</span>` : '';
+        const isProductBest = bestSellers.includes(p.id);
+        const bestBadge = isProductBest ? `<span class="badge-best">⭐ BEST</span>` : '';
         const stockBadge = isOut ? `<span class="badge-out">🚫 Habis</span>` : (isLowStock ? `<span class="badge-low">⚠️ Tipis</span>` : '');
         
         container.innerHTML += `
@@ -319,7 +349,11 @@ function addToCart(productId) {
     if(product && product.stock > 0) {
         product.stock -= 1;
         const cartItem = state.cart.find(item => item.id === productId);
-        if(cartItem) { cartItem.qty += 1; } else { state.cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 }); }
+        if(cartItem) {
+            cartItem.qty += 1;
+        } else {
+            state.cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+        }
         renderPOSCatalog();
         renderCart();
     }
@@ -329,13 +363,12 @@ function renderCart() {
     const list = document.getElementById('cart-items-list');
     list.innerHTML = '';
     let grandTotal = 0;
-
     if(state.cart.length === 0) {
         list.innerHTML = `<div class="empty-cart-state">🛒 Keranjang belanja kosong</div>`;
+        document.getElementById('cart-mini-total').innerText = 'Rp 0';
         document.getElementById('cart-grand-total').innerText = 'Rp 0';
         return;
     }
-
     state.cart.forEach(item => {
         const total = item.price * item.qty;
         grandTotal += total;
@@ -349,305 +382,457 @@ function renderCart() {
             </div>
         `;
     });
+    document.getElementById('cart-mini-total').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
     document.getElementById('cart-grand-total').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
 }
 
-function togglePaymentLayout() {
-    const method = document.getElementById('cart-payment-method').value;
-    document.getElementById('qris-payment-box').style.display = (method === 'qris') ? 'block' : 'none';
+function switchCartSubTab(subTab) {
+    document.getElementById('cart-tab-list').classList.remove('active');
+    document.getElementById('cart-tab-pay').classList.remove('active');
+    document.getElementById('cart-sub-page-list').classList.remove('active');
+    document.getElementById('cart-sub-page-pay').classList.remove('active');
+
+    if (subTab === 'list') {
+        document.getElementById('cart-tab-list').classList.add('active');
+        document.getElementById('cart-sub-page-list').classList.add('active');
+    } else {
+        document.getElementById('cart-tab-pay').classList.add('active');
+        document.getElementById('cart-sub-page-pay').classList.add('active');
+    }
 }
 
-// FUNGSI BARU UNTUK MEMILIH METODE PEMBAYARAN VIA KLIK TOMBOL
+function goToPaymentTab() {
+    const name = document.getElementById('cart-customer-name').value.trim();
+    if(!name) { alert('⚠️ Mohon tulis nama pembeli terlebih dahulu!'); return; }
+    if(state.cart.length === 0) { alert('⚠️ Keranjang masih kosong!'); return; }
+    switchCartSubTab('pay');
+}
+
 function selectPaymentMethod(method) {
-    // Set nilai ke input hidden agar fungsi checkout tidak patah/error
-    document.getElementById('cart-payment-method').value = method;
-    
-    // Hapus kelas active dari semua tombol metode pembayaran
     document.getElementById('pay-btn-cash').classList.remove('active');
     document.getElementById('pay-btn-qris').classList.remove('active');
-    
-    // Tambahkan kelas active ke tombol yang dipilih
-    if (method === 'cash') {
+    document.getElementById('cart-payment-method').value = method;
+
+    if(method === 'cash') {
         document.getElementById('pay-btn-cash').classList.add('active');
         document.getElementById('qris-payment-box').style.display = 'none';
-    } else if (method === 'qris') {
+    } else {
         document.getElementById('pay-btn-qris').classList.add('active');
         document.getElementById('qris-payment-box').style.display = 'block';
     }
 }
 
 function checkoutOrder() {
-    const customerName = document.getElementById('cart-customer-name').value.trim();
-    if(!customerName) { alert('⚠️ Silakan isi nama pembeli terlebih dahulu.'); return; }
-    if(state.cart.length === 0) { alert('⚠️ Keranjang belanja anda masih kosong!'); return; }
-
-    const paymentMethod = document.getElementById('cart-payment-method').value;
+    const custName = document.getElementById('cart-customer-name').value.trim();
     const notes = document.getElementById('cart-cashier-notes').value.trim();
+    const method = document.getElementById('cart-payment-method').value;
+
+    if(!custName || state.cart.length === 0) return;
     
-    let totalPayment = 0;
-    state.cart.forEach(i => totalPayment += (i.price * i.qty));
+    let grandTotal = 0;
+    state.cart.forEach(i => grandTotal += (i.price * i.qty));
 
-    const orderId = 'CP-' + Math.floor(1000 + Math.random() * 9000);
-    const nowTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-    const nowDateKey = getSimpleDate();
+    const nextId = state.orders.length > 0 ? Math.max(...state.orders.map(o => o.id)) + 1 : 1001;
+    const timeString = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-    const newOrder = { 
-        id: orderId, 
-        time: nowTime, 
-        dateKey: nowDateKey,
-        customer: customerName, 
-        items: [...state.cart], 
-        total: totalPayment, 
-        method: paymentMethod.toUpperCase(), 
-        status: 'Antri',
-        notes: notes || '-' 
+    const newOrder = {
+        id: nextId,
+        customer: custName,
+        items: [...state.cart],
+        total: grandTotal,
+        method: method.toUpperCase(),
+        notes: notes || '-',
+        status: 'Pending',
+        time: timeString,
+        dateKey: getSimpleDate()
     };
 
     state.orders.push(newOrder);
     syncOrdersStorage();
     syncProductsStorage();
-    updateDailyRecapData();
 
+    // Reset Form Belanja
     state.cart = [];
     document.getElementById('cart-customer-name').value = '';
     document.getElementById('cart-cashier-notes').value = '';
-    document.getElementById('cart-payment-method').value = 'cash';
-    document.getElementById('qris-payment-box').style.display = 'none';
-    document.getElementById('pay-btn-cash').classList.add('active');
-    document.getElementById('pay-btn-qris').classList.remove('active');
-    
+    selectPaymentMethod('cash');
     renderCart();
     renderPOSCatalog();
-    openReceiptModal(newOrder);
+
+    showReceiptModal(newOrder);
 }
 
-// --- NOTA KASIR / PEMBELI ---
-function openReceiptModal(order) {
-    const area = document.getElementById('receipt-print-area');
-    let itemRowsHtml = '';
+function showReceiptModal(order) {
+    const wrapper = document.getElementById('receipt-print-area');
+    let itemsHtml = '';
     order.items.forEach(i => {
-        itemRowsHtml += `
-            <div class="receipt-item-block">
-                <div class="receipt-item-title">${i.name}</div>
-                <div class="receipt-item-detail">
-                    <span>${i.qty} x Rp ${i.price.toLocaleString('id-ID')}</span>
-                    <span>Rp ${(i.qty * i.price).toLocaleString('id-ID')}</span>
-                </div>
+        itemsHtml += `
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:5px;">
+                <span>${i.name} (x${i.qty})</span>
+                <span>Rp ${(i.price * i.qty).toLocaleString('id-ID')}</span>
             </div>
         `;
     });
 
-    area.innerHTML = `
-        <div class="receipt-header">
-            <h4>CAFE CP 55</h4>
-            <p>Jl. Proklamasi No.55, Injen Barat, Pekauman, Kec. Gresik</p>
-            <p>Gresik, Jawa Timur</p>
+    wrapper.innerHTML = `
+        <div style="text-align: center; margin-bottom: 15px;">
+            <h3 style="margin-bottom:2px;">CAFE CP 55</h3>
+            <p style="font-size:0.75rem; color:#666; margin-bottom:5px;">Gresik, Jawa Timur</p>
+            <div style="border-top:1px dashed #ccc; margin-top:10px;"></div>
         </div>
-        <div class="receipt-divider"></div>
-        <div class="receipt-meta-row"><span>ID Struk: ${order.id}</span><span>Jam: ${order.time}</span></div>
-        <div class="receipt-meta-row"><span>Pelanggan: ${order.customer}</span><span>Kasir: Sistem Digital</span></div>
-        <div class="receipt-divider"></div>
-        ${itemRowsHtml}
-        <div class="receipt-divider"></div>
-        <div class="receipt-meta-row" style="flex-direction:column; align-items:flex-start; margin-bottom:8px;">
-            <span style="font-size:0.8rem; text-transform:uppercase; color:#555;">Catatan Kasir:</span>
-            <span style="font-style:italic; font-weight:600; padding-left:5px;">"${order.notes || '-'}"</span>
+        <div style="font-size:0.8rem; color:#444; margin-bottom:12px; line-height:1.4;">
+            <div><strong>No. Nota:</strong> #${order.id}</div>
+            <div><strong>Waktu:</strong> ${order.dateKey} - ${order.time}</div>
+            <div><strong>Pelanggan:</strong> ${order.customer}</div>
+            <div><strong>Metode:</strong> ${order.method}</div>
+            <div><strong>Notes:</strong> ${order.notes}</div>
         </div>
-        <div class="receipt-divider"></div>
-        <div class="receipt-total-block">
-            <div class="receipt-total-row"><span>Total Akhir:</span><strong>Rp ${order.total.toLocaleString('id-ID')}</strong></div>
-            <div class="receipt-total-row"><span>Metode:</span><span>${order.method}</span></div>
-            <div class="receipt-total-row"><span>Status:</span><span style="font-weight: bold; color: #16a085;">LUNAS</span></div>
+        <div style="border-top:1px dashed #ccc; padding-top:10px; margin-bottom:10px;">
+            ${itemsHtml}
         </div>
-        <div class="receipt-divider"></div>
-        <div class="receipt-footer"><p>Terima Kasih Atas Kunjungan Anda</p><p>-- Pelayanan Sat-Set Khas CP 55 --</p></div>
+        <div style="border-top:1px dashed #ccc; padding-top:10px; display:flex; justify-content:space-between; font-weight:bold; font-size:1rem; color:var(--primary);">
+            <span>TOTAL BAYAR:</span>
+            <span>Rp ${order.total.toLocaleString('id-ID')}</span>
+        </div>
+        <div style="text-align:center; margin-top:20px; font-size:0.75rem; color:#777; font-style:italic;">
+            Terima kasih atas kunjungan Anda!<br>Pesanan sedang diteruskan ke dapur monitor.
+        </div>
     `;
     document.getElementById('modal-receipt').style.display = 'flex';
 }
 
-function showSavedReceipt(orderId) {
-    const order = state.orders.find(o => o.id === orderId);
-    if(order) openReceiptModal(order);
+function closeReceiptModal() {
+    document.getElementById('modal-receipt').style.display = 'none';
+    
+    if (state.currentUser === 'Kasir') {
+        switchTab('history');
+    } else if (state.currentUser === 'Owner') {
+        switchTab('owner-summary');
+    } else {
+        switchTab('pembeli');
+    }
 }
 
-function closeReceiptModal() { document.getElementById('modal-receipt').style.display = 'none'; }
-
-// --- KASIR ENGINE ---
 function renderKitchenDashboard() {
-    const tbody = document.getElementById('table-kitchen-body');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    if(state.orders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Belum ada antrean pesanan masuk.</td></tr>`;
+    const container = document.getElementById('kitchen-cards-render');
+    if(!container) return;
+    container.innerHTML = '';
+
+    const activeOrders = state.orders.filter(o => o.status === 'Pending' || o.status === 'Cooking');
+    if(activeOrders.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align:center; padding:50px; color:var(--text-muted);">
+                <span style="font-size:3rem;">📭</span>
+                <p style="margin-top:10px; font-weight:600;">Belum ada pesanan masuk ke antrean dapur saat ini.</p>
+            </div>
+        `;
         return;
     }
-    [...state.orders].reverse().forEach(order => {
-        let itemsString = order.items.map(i => `${i.name} (x${i.qty})`).join(', ');
-        if(order.notes && order.notes !== '-') {
-            itemsString += ` <br><small style="color:var(--accent); font-weight:bold;">📝 NB: ${order.notes}</small>`;
-        }
-        let badgeClass = order.status === 'Dimasak' ? 'status-process' : (order.status === 'Selesai Saji' ? 'status-complete' : 'status-pending');
-        let actionBtn = order.status === 'Antri' ? `<button class="btn-action" style="background:#0984e3; color:white;" onclick="changeOrderStatus('${order.id}', 'Dimasak')">Masak</button>` : (order.status === 'Dimasak' ? `<button class="btn-action" style="background:#222f3e; color:white;" onclick="changeOrderStatus('${order.id}', 'Selesai Saji')">Sajikan</button>` : `<span style="font-size:0.85rem; color:#27ae60;">✔ Selesai</span>`);
 
-        tbody.innerHTML += `<tr><td><strong>${order.id}</strong></td><td>${order.customer}</td><td>${itemsString}</td><td><span class="role-badge" style="background:#7f8c8d;">${order.method}</span></td><td><span class="status-badge ${badgeClass}">${order.status}</span></td><td>${actionBtn}</td></tr>`;
+    activeOrders.forEach(o => {
+        let itemsListHtml = '';
+        o.items.forEach(i => {
+            itemsListHtml += `<li><strong>${i.qty}x</strong> ${i.name}</li>`;
+        });
+
+        const statusLabel = o.status === 'Pending' ? 'Antrean Baru' : 'Sedang Dimasak';
+        const statusClass = o.status === 'Pending' ? 'status-pending' : 'status-cooking';
+        
+        container.innerHTML += `
+            <div class="kitchen-card ${o.status === 'Cooking' ? 'border-cooking' : ''}">
+                <div class="k-card-header">
+                    <div>
+                        <span class="k-id">#${o.id}</span>
+                        <span class="k-time">⏰ ${o.time}</span>
+                    </div>
+                    <span class="k-badge ${statusClass}">${statusLabel}</span>
+                </div>
+                <div class="k-customer">Pelanggan: <strong>${o.customer}</strong></div>
+                <ul class="k-items">${itemsListHtml}</ul>
+                <div class="k-notes">💡 Catatan: <span>${o.notes}</span></div>
+                <div class="k-actions">
+                    ${o.status === 'Pending' ? `
+                        <button class="k-btn btn-cook" onclick="updateOrderStatus(${o.id}, 'Cooking')">Mulai Masak 🍳</button>
+                    ` : `
+                        <button class="k-btn btn-done" onclick="updateOrderStatus(${o.id}, 'Completed')">Siap Sajikan ✔</button>
+                    `}
+                </div>
+            </div>
+        `;
     });
 }
 
-function changeOrderStatus(orderId, newStatus) {
+function updateOrderStatus(orderId, newStatus) {
     const order = state.orders.find(o => o.id === orderId);
-    if(order) { order.status = newStatus; syncOrdersStorage(); renderKitchenDashboard(); }
+    if(order) {
+        order.status = newStatus;
+        syncOrdersStorage();
+        updateDailyRecapData();
+        if(state.currentUser === 'Kasir') renderKitchenDashboard();
+        if(state.currentUser === 'Owner') renderOwnerDashboard('owner-summary');
+    }
 }
 
 function renderHistoryList() {
     const tbody = document.getElementById('table-history-body');
     if(!tbody) return;
     tbody.innerHTML = '';
+
     if(state.orders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Belum ada riwayat nota.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#aaa;">Belum ada riwayat transaksi nota penjualan.</td></tr>`;
         return;
     }
+
     [...state.orders].reverse().forEach(o => {
-        tbody.innerHTML += `<tr><td>${o.time}</td><td><strong>${o.id}</strong></td><td>${o.customer}</td><td>Rp ${o.total.toLocaleString('id-ID')}</td><td>${o.method}</td><td><button class="btn-action" style="background:#16a085; color:white;" onclick="showSavedReceipt('${o.id}')">Lihat Nota</button></td></tr>`;
+        let itemsSummary = o.items.map(i => `${i.name} (${i.qty})`).join(', ');
+        let pillColor = o.status === 'Completed' ? '#2ecc71' : (o.status === 'Cooking' ? '#f1c40f' : '#e67e22');
+        if(o.status === 'Cancelled') pillColor = '#e74c3c';
+
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>#${o.id}</strong></td>
+                <td>${o.dateKey || ''} ${o.time}</td>
+                <td>${o.customer}</td>
+                <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${itemsSummary}">${itemsSummary}</td>
+                <td><strong>Rp ${o.total.toLocaleString('id-ID')}</strong></td>
+                <td><span class="pay-method-badge">${o.method}</span></td>
+                <td><span class="status-pill" style="background:${pillColor}">${o.status}</span></td>
+                <td>
+                    <button style="padding:4px 8px; font-size:0.75rem; cursor:pointer;" onclick="reprintReceiptById(${o.id})">Lihat Nota 📄</button>
+                    ${(o.status !== 'Completed' && o.status !== 'Cancelled') ? `
+                        <button style="padding:4px 8px; font-size:0.75rem; background:var(--accent); color:white; border:none; border-radius:3px; cursor:pointer;" onclick="cancelOrderFromHistory(${o.id})">Batal</button>
+                    ` : ''}
+                </td>
+            </tr>
+        `;
     });
 }
 
-// --- OWNER ENGINE ---
-function renderOwnerDashboard(activeSubTab) {
+function reprintReceiptById(orderId) {
+    const order = state.orders.find(o => o.id === orderId);
+    if(order) showReceiptModal(order);
+}
+
+function cancelOrderFromHistory(orderId) {
+    if(confirm('Apakah Anda yakin ingin membatalkan pesanan ini? Stok akan dikembalikan otomatis.')) {
+        const order = state.orders.find(o => o.id === orderId);
+        if(order) {
+            order.status = 'Cancelled';
+            // Kembalikan pasokan stok
+            order.items.forEach(item => {
+                const product = state.products.find(p => p.id === item.id);
+                if(product) product.stock += item.qty;
+            });
+            syncOrdersStorage();
+            syncProductsStorage();
+            updateDailyRecapData();
+            renderHistoryList();
+        }
+    }
+}
+
+function renderOwnerDashboard(activeTabName) {
     updateDailyRecapData();
 
-    let totalGrossRevenue = 0; 
-    state.orders.forEach(o => totalGrossRevenue += o.total);
+    if(activeTabName === 'owner-summary') {
+        let totalRevenue = 0;
+        state.orders.forEach(o => { if(o.status === 'Completed') totalRevenue += o.total; });
 
-    let totalExpenses = 0; 
-    state.expenses.forEach(e => totalExpenses += e.amount);
+        let totalExpenses = 0;
+        state.expenses.forEach(e => totalExpenses += e.amount);
+        
+        let netProfit = totalRevenue - totalExpenses;
 
-    let netProfit = totalGrossRevenue - totalExpenses;
+        document.getElementById('stat-revenue').innerText = `Rp ${totalRevenue.toLocaleString('id-ID')}`;
+        document.getElementById('stat-expenses').innerText = `Rp ${totalExpenses.toLocaleString('id-ID')}`;
+        document.getElementById('stat-profit').innerText = `Rp ${netProfit.toLocaleString('id-ID')}`;
 
-    const revDisp = document.getElementById('owner-revenue-display');
-    const expDisp = document.getElementById('owner-expenses-display');
-    const profDisp = document.getElementById('owner-net-profit-display');
-
-    if(revDisp) revDisp.innerText = `Rp ${totalGrossRevenue.toLocaleString('id-ID')}`;
-    if(expDisp) expDisp.innerText = `Rp ${totalExpenses.toLocaleString('id-ID')}`;
-    if(profDisp) profDisp.innerText = `Rp ${netProfit.toLocaleString('id-ID')}`;
-
-    if (activeSubTab === 'owner-summary') {
-        const chartZone = document.getElementById('daily-charts-render-zone');
-        if(chartZone) {
-            chartZone.innerHTML = '';
-            if(state.dailyRecaps.length === 0) {
-                chartZone.innerHTML = `<p style="text-align:center; padding: 20px; color:#999;">Belum ada tren data perhari terkumpul.</p>`;
-            } else {
-                [...state.dailyRecaps].reverse().forEach(day => {
-                    const localMax = Math.max(day.revenue, day.expenses, 1);
-                    const revPct = (day.revenue / localMax) * 100;
-                    const expPct = (day.expenses / localMax) * 100;
-
-                    chartZone.innerHTML += `
-                        <div class="daily-chart-row">
-                            <div class="daily-chart-date">📅 ${day.date}</div>
-                            
-                            <div class="daily-bar-wrapper">
-                                <span class="daily-bar-label" style="color:#2ecc71;">Pemasukan</span>
-                                <div class="daily-bar-track">
-                                    <div class="daily-bar-fill" style="background:#2ecc71; width:${revPct}%;"></div>
-                                </div>
-                                <span class="daily-bar-val">Rp ${day.revenue.toLocaleString('id-ID')}</span>
+        // Render Trend Chart Harian
+        const dailyChartContainer = document.getElementById('chart-daily-render');
+        dailyChartContainer.innerHTML = '';
+        
+        if(state.dailyRecaps.length === 0) {
+            dailyChartContainer.innerHTML = '<p style="color:#999; text-align:center; padding-top:20px;">Belum ada data rekap harian.</p>';
+        } else {
+            let maxProfit = Math.max(...state.dailyRecaps.map(r => Math.abs(r.profit)), 1);
+            state.dailyRecaps.forEach(r => {
+                const percentage = Math.min((Math.abs(r.profit) / maxProfit) * 100, 100);
+                const barColor = r.profit >= 0 ? 'var(--secondary)' : 'var(--accent)';
+                dailyChartContainer.innerHTML += `
+                    <div class="daily-chart-row">
+                        <div class="daily-chart-date">${r.date}</div>
+                        <div class="daily-bar-wrapper">
+                            <span class="daily-bar-label">Profit Bersih</span>
+                            <div class="daily-bar-track">
+                                <div class="daily-bar-fill" style="width: ${percentage}%; background-color: ${barColor};"></div>
                             </div>
-
-                            <div class="daily-bar-wrapper">
-                                <span class="daily-bar-label" style="color:#e74c3c;">Pengeluaran</span>
-                                <div class="daily-bar-track">
-                                    <div class="daily-bar-fill" style="background:#e74c3c; width:${expPct}%;"></div>
-                                </div>
-                                <span class="daily-bar-val">Rp ${day.expenses.toLocaleString('id-ID')}</span>
-                            </div>
+                            <span class="daily-bar-val" style="color:${barColor}">Rp ${r.profit.toLocaleString('id-ID')}</span>
                         </div>
-                    `;
+                    </div>
+                `;
+            });
+        }
+
+        // Render Top Sold Item Chart
+        const bestChartContainer = document.getElementById('chart-best-render');
+        bestChartContainer.innerHTML = '';
+        
+        let itemQuantities = {};
+        state.orders.forEach(o => {
+            if(o.status === 'Completed') {
+                o.items.forEach(i => {
+                    itemQuantities[i.name] = (itemQuantities[i.name] || 0) + i.qty;
                 });
             }
-        }
-    }
+        });
 
-    if (activeSubTab === 'owner-expense') {
-        const tbodyExpense = document.getElementById('table-expense-body');
-        if (tbodyExpense) {
-            tbodyExpense.innerHTML = '';
-            if (state.expenses.length === 0) {
-                tbodyExpense.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada catatan pengeluaran barang.</td></tr>`;
-            } else {
-                [...state.expenses].reverse().forEach(e => {
-                    tbodyExpense.innerHTML += `
-                        <tr>
-                            <td>${e.datetime || '-'}</td>
-                            <td><strong>${e.description}</strong></td>
-                            <td style="color:#e74c3c; font-weight:bold;">Rp ${e.amount.toLocaleString('id-ID')}</td>
-                            <td>
-                                <button class="btn-action" style="background:#e74c3c; color:white; padding:3px 8px; font-size:0.8rem;" onclick="deleteExpense('${e.id}')">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-        }
-    }
+        let topItems = Object.keys(itemQuantities).map(name => {
+            return { name: name, qty: itemQuantities[name] };
+        });
+        topItems.sort((a,b) => b.qty - a.qty);
 
-    if (activeSubTab === 'owner-recap') {
-        const tbodyRecap = document.getElementById('table-recap-body');
-        if(tbodyRecap) {
-            tbodyRecap.innerHTML = '';
-            if(state.dailyRecaps.length === 0) {
-                tbodyRecap.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada rekapan harian.</td></tr>`;
-            } else {
-                [...state.dailyRecaps].reverse().forEach(r => {
-                    tbodyRecap.innerHTML += `<tr><td><strong>${r.date}</strong></td><td style="color:#2ecc71; font-weight:600;">Rp ${r.revenue.toLocaleString('id-ID')}</td><td style="color:#e74c3c; font-weight:600;">Rp ${r.expenses.toLocaleString('id-ID')}</td><td style="color:${r.profit >= 0 ? '#16a085' : '#c0392b'}; font-weight:bold;">Rp ${r.profit.toLocaleString('id-ID')}</td><td><span class="status-badge" style="background:#e1f5fe; color:#0288d1; font-size:0.75rem;">Aktif Ter-arsip</span></td></tr>`;
-                });
-            }
-        }
-    }
-
-    if (activeSubTab === 'owner-stock') {
-        const tbodyStock = document.getElementById('table-stock-body');
-        if(tbodyStock) {
-            tbodyStock.innerHTML = '';
-            state.products.forEach(p => {
-                tbodyStock.innerHTML += `<tr><td><strong>${p.name}</strong> ${p.isBest ? '⭐' : ''}</td><td>${p.category}</td><td>Rp ${p.price.toLocaleString('id-ID')}</td><td style="font-weight:bold; color:${p.stock <= 5 ? '#e67e22' : '#2c3e50'}">${p.stock} pcs</td><td><input type="number" id="input-stock-${p.id}" style="width:60px; padding:4px;" min="1" value="10"><button class="btn-action" style="background:#27ae60; color:white; margin-left:5px;" onclick="restockItem(${p.id})">Tambah</button></td></tr>`;
+        if(topItems.length === 0) {
+            bestChartContainer.innerHTML = '<p style="color:#999; text-align:center; padding-top:20px;">Belum ada menu terjual.</p>';
+        } else {
+            let maxQty = Math.max(...topItems.map(i => i.qty), 1);
+            topItems.forEach(item => {
+                const percentage = (item.qty / maxQty) * 100;
+                bestChartContainer.innerHTML += `
+                    <div class="daily-chart-row">
+                        <div class="daily-chart-date" style="color:var(--primary); font-size:0.9rem;">${item.name}</div>
+                        <div class="daily-bar-wrapper">
+                            <span class="daily-bar-label">Terjual</span>
+                            <div class="daily-bar-track">
+                                <div class="daily-bar-fill" style="width: ${percentage}%; background-color: #27ae60;"></div>
+                            </div>
+                            <span class="daily-bar-val" style="color:#27ae60">${item.qty} Porsi</span>
+                        </div>
+                    </div>
+                `;
             });
         }
     }
+
+    if(activeTabName === 'owner-recap') {
+        const tbody = document.getElementById('table-recap-body');
+        tbody.innerHTML = '';
+        if(state.dailyRecaps.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#aaa; padding:20px;">Belum ada log rekap harian bulan ini.</td></tr>`;
+            return;
+        }
+        [...state.dailyRecaps].reverse().forEach(r => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${r.date}</strong></td>
+                    <td style="color:#27ae60; font-weight:600;">+ Rp ${r.revenue.toLocaleString('id-ID')}</td>
+                    <td style="color:var(--accent);"> - Rp ${r.expenses.toLocaleString('id-ID')}</td>
+                    <td style="font-weight:700; color:${r.profit >= 0 ? 'var(--primary)' : 'var(--accent)'}">Rp ${r.profit.toLocaleString('id-ID')}</td>
+                </tr>
+            `;
+        });
+    }
+
+    if(activeTabName === 'owner-expense') {
+        renderExpensesListTable();
+    }
+
+    if(activeTabName === 'owner-stock') {
+        const tbody = document.getElementById('table-stock-body');
+        tbody.innerHTML = '';
+        state.products.forEach(p => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td><span class="pay-method-badge">${p.category}</span></td>
+                    <td>Rp ${p.price.toLocaleString('id-ID')}</td>
+                    <td>
+                        <span style="font-weight:bold; color:${p.stock <= 5 ? 'var(--accent)' : 'inherit'}">
+                            ${p.stock} Tersedia
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <input type="number" id="input-stock-${p.id}" class="form-control" style="width:70px; padding:4px;" placeholder="Qty" min="1">
+                            <button style="padding:5px 10px; background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer;" onclick="restockItem(${p.id})">Pasok 📦</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
 }
 
-function addExpenseByOwner() {
-    const descIn = document.getElementById('expense-desc').value.trim();
+function submitExpenseByOwner() {
+    const nameIn = document.getElementById('expense-name').value.trim();
     const amountIn = parseInt(document.getElementById('expense-amount').value);
-    if(!descIn || isNaN(amountIn) || amountIn <= 0) { alert('⚠️ Mohon lengkapi nama barang dan harga dengan benar!'); return; }
 
-    const now = new Date();
-    const formattedDateTime = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) + ', ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    const dateKey = getSimpleDate();
+    if(!nameIn || isNaN(amountIn) || amountIn <= 0) {
+        alert('⚠️ Mohon isi deskripsi keperluan belanja dan nominal rupiah secara benar!');
+        return;
+    }
 
-    state.expenses.push({ 
-        id: 'EXP-' + Date.now(), 
-        description: descIn, 
+    const nextId = state.expenses.length > 0 ? Math.max(...state.expenses.map(e => e.id)) + 1 : 1;
+    const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+    state.expenses.push({
+        id: nextId,
+        name: nameIn,
         amount: amountIn,
-        datetime: formattedDateTime,
-        dateKey: dateKey
+        time: timeStr,
+        dateKey: getSimpleDate()
     });
-    
+
     syncExpensesStorage();
-    
-    document.getElementById('expense-desc').value = '';
+    updateDailyRecapData();
+
+    document.getElementById('expense-name').value = '';
     document.getElementById('expense-amount').value = '';
     
-    renderOwnerDashboard('owner-expense');
-    alert(`✔ Sukses mencatat pengeluaran: "${descIn}"`);
+    renderExpensesListTable();
+    alert('✔ Pengeluaran operasional berhasil disimpan!');
 }
 
-function deleteExpense(expenseId) {
-    if(confirm("Apakah Anda yakin ingin menghapus catatan barang pengeluaran ini?")) {
-        state.expenses = state.expenses.filter(e => e.id !== expenseId);
+function renderExpensesListTable() {
+    const tbody = document.getElementById('table-expense-body');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+
+    const currentTodayTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const currentTodayDate = getSimpleDate();
+
+    if(state.expenses.length === 0) {
+        // Tampilan tabel kosong elegan real-time
+        tbody.innerHTML = `
+            <tr>
+                <td style="color:#8e8076; font-size: 0.85rem;">${currentTodayDate} - ${currentTodayTime}</td>
+                <td style="color:#9e9e9e; font-style:italic;">Belum ada pengeluaran operasional tercatat hari ini.</td>
+                <td style="color:#9e9e9e; font-weight:600;">Rp 0</td>
+                <td>-</td>
+            </tr>
+        `;
+        return;
+    }
+
+    [...state.expenses].reverse().forEach(e => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${e.dateKey} - ${e.time}</td>
+                <td><strong>${e.name}</strong></td>
+                <td style="color:var(--accent); font-weight:600;">- Rp ${e.amount.toLocaleString('id-ID')}</td>
+                <td>
+                    <button style="padding:3px 8px; background:var(--accent); color:white; border:none; border-radius:3px; cursor:pointer; font-size:0.75rem;" onclick="deleteExpenseById(${e.id})">Hapus</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function deleteExpenseById(id) {
+    if(confirm('Hapus catatan pengeluaran operasional ini?')) {
+        state.expenses = state.expenses.filter(e => e.id !== id);
         syncExpensesStorage();
-        renderOwnerDashboard('owner-expense');
+        updateDailyRecapData();
+        renderExpensesListTable();
     }
 }
 
@@ -657,22 +842,32 @@ function addNewMenuByOwner() {
     const priceIn = parseInt(document.getElementById('new-menu-price').value);
     const stockIn = parseInt(document.getElementById('new-menu-stock').value);
 
-    if(!nameIn || isNaN(priceIn) || isNaN(stockIn) || priceIn <= 0 || stockIn < 0) { alert('⚠️ Mohon isi seluruh formulir dengan benar!'); return; }
+    if(!nameIn || isNaN(priceIn) || isNaN(stockIn) || priceIn <= 0 || stockIn < 0) { 
+        alert('⚠️ Mohon isi seluruh formulir dengan benar!'); 
+        return; 
+    }
     const nextId = state.products.length > 0 ? Math.max(...state.products.map(p => p.id)) + 1 : 1;
 
-    state.products.push({ id: nextId, name: nameIn, price: priceIn, stock: stockIn, isBest: false, category: catIn });
+    state.products.push({ id: nextId, name: nameIn, price: priceIn, stock: stockIn, category: catIn });
     syncProductsStorage();
     
     document.getElementById('new-menu-name').value = '';
     document.getElementById('new-menu-price').value = '';
     document.getElementById('new-menu-stock').value = '';
-    renderOwnerDashboard('owner-addmenu');
+    switchTab('owner-stock');
     alert(`✔ Menu "${nameIn}" berhasil ditambahkan!`);
 }
 
 function restockItem(productId) {
     const inputVal = parseInt(document.getElementById(`input-stock-${productId}`).value);
-    if(isNaN(inputVal) || inputVal <= 0) { alert('⚠️ Masukkan jumlah suplai valid.'); return; }
+    if(isNaN(inputVal) || inputVal <= 0) { alert('⚠️ Masukkan jumlah pasokan stok secara valid!'); return; }
+    
     const product = state.products.find(p => p.id === productId);
-    if(product) { product.stock += inputVal; syncProductsStorage(); renderOwnerDashboard('owner-stock'); alert(`✔ Stok ${product.name} berhasil ditambah!`); }
+    if(product) {
+        product.stock += inputVal;
+        syncProductsStorage();
+        document.getElementById(`input-stock-${productId}`).value = '';
+        renderOwnerDashboard('owner-stock');
+        alert(`✔ Berhasil menambah stok untuk ${product.name}!`);
+    }
 }
