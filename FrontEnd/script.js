@@ -282,7 +282,7 @@ function filterCategory(category, element) {
     renderPOSCatalog();
 }
 
-// OTOMATIS MEMASANG BADGE BEST SELLER BERDASARKAN QUANTITY YANG SELESAI DIJUAL
+// LOGIKA PINTAR: Syarat Best Seller harus terjual > 5 Porsi, Maksimal diambil 4 teratas
 function getBestSellerProductIds() {
     let productSalesMap = {};
     state.orders.forEach(o => {
@@ -300,16 +300,21 @@ function getBestSellerProductIds() {
         return { id: parseInt(id), qty: productSalesMap[id] };
     });
 
-    salesArray.sort((a, b) => b.qty - a.qty);
-    // Mengambil top 3 item dengan penjualan tertinggi (hanya jika ada kuantitas terjual > 0)
-    return salesArray.filter(item => item.qty > 0).slice(0, 3).map(item => item.id);
+    // Filter: Pembelian minimal harus DI ATAS 5 porsi agar masuk kategori Best Seller
+    return salesArray
+        .filter(item => item.qty > 5)
+        .sort((a, b) => b.qty - a.qty)
+        .slice(0, 4) // Batasi maksimal hanya 4 menu terlaris dalam satu siklus rekap harian/mingguan
+        .map(item => item.id);
 }
 
 function renderPOSCatalog() {
     const container = document.getElementById('pos-menu-render');
     if(!container) return;
     container.innerHTML = '';
-    const filtered = state.products.filter(p => state.selectedCategory === 'Semua' || p.category === state.selectedCategory);
+    
+    // Filter kategori awal
+    let filtered = state.products.filter(p => state.selectedCategory === 'Semua' || p.category === state.selectedCategory);
 
     if(filtered.length === 0) {
         container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding: 30px; color:#999;">Menu tidak ditemukan.</p>`;
@@ -317,6 +322,13 @@ function renderPOSCatalog() {
     }
 
     const bestSellers = getBestSellerProductIds();
+
+    // FITUR UTAMA: Urutkan agar menu Best Seller otomatis naik ke deretan paling atas
+    filtered.sort((a, b) => {
+        const aIsBest = bestSellers.includes(a.id) ? 1 : 0;
+        const bIsBest = bestSellers.includes(b.id) ? 1 : 0;
+        return bIsBest - aIsBest; // Pemenang Best Seller didahulukan ke atas indeks
+    });
 
     filtered.forEach(p => {
         const isLowStock = p.stock <= 5 && p.stock > 0;
@@ -501,6 +513,7 @@ function showReceiptModal(order) {
     document.getElementById('modal-receipt').style.display = 'flex';
 }
 
+// FIX UTAMA: Pengecekan pendaratan halaman asal secara pintar saat menutup nota
 function closeReceiptModal() {
     document.getElementById('modal-receipt').style.display = 'none';
     
@@ -618,7 +631,6 @@ function cancelOrderFromHistory(orderId) {
         const order = state.orders.find(o => o.id === orderId);
         if(order) {
             order.status = 'Cancelled';
-            // Kembalikan pasokan stok
             order.items.forEach(item => {
                 const product = state.products.find(p => p.id === item.id);
                 if(product) product.stock += item.qty;
@@ -673,7 +685,7 @@ function renderOwnerDashboard(activeTabName) {
             });
         }
 
-        // Render Top Sold Item Chart
+        // FIX UTAMA: Batasi Grafik Terlaris di dashboard Owner maksimal HANYA "Top 5" menu teratas
         const bestChartContainer = document.getElementById('chart-best-render');
         bestChartContainer.innerHTML = '';
         
@@ -691,11 +703,14 @@ function renderOwnerDashboard(activeTabName) {
         });
         topItems.sort((a,b) => b.qty - a.qty);
 
-        if(topItems.length === 0) {
+        // Batasi hanya memotong 5 data teratas saja
+        let finalTop5Items = topItems.slice(0, 5);
+
+        if(finalTop5Items.length === 0) {
             bestChartContainer.innerHTML = '<p style="color:#999; text-align:center; padding-top:20px;">Belum ada menu terjual.</p>';
         } else {
-            let maxQty = Math.max(...topItems.map(i => i.qty), 1);
-            topItems.forEach(item => {
+            let maxQty = Math.max(...finalTop5Items.map(i => i.qty), 1);
+            finalTop5Items.forEach(item => {
                 const percentage = (item.qty / maxQty) * 100;
                 bestChartContainer.innerHTML += `
                     <div class="daily-chart-row">
@@ -801,7 +816,6 @@ function renderExpensesListTable() {
     const currentTodayDate = getSimpleDate();
 
     if(state.expenses.length === 0) {
-        // Tampilan tabel kosong elegan real-time
         tbody.innerHTML = `
             <tr>
                 <td style="color:#8e8076; font-size: 0.85rem;">${currentTodayDate} - ${currentTodayTime}</td>
