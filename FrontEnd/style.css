@@ -601,10 +601,10 @@ body {
 .form-group label {
     display: block;
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: bold;
     color: var(--primary);
     margin-bottom: 6px;
-    text-transform: uppercase;
+    text-transform: sentences;
     letter-spacing: 0.5px;
 }
 
@@ -633,6 +633,7 @@ body {
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow);
+    text-align: center;
 }
 
 .login-image-side {
@@ -644,6 +645,42 @@ body {
     align-items: center;
     justify-content: center;
     padding: 40px;
+}
+
+.login-form-side .form-group label {
+    text-align: center !important;
+    display: block;
+    width: 100%;
+    
+    /* FIX DI SINI */
+    text-transform: none !important;    /* Mematikan fungsi UPPERCASE bawaan */
+    font-size: 0.9rem !important;       /* Ukuran font sedikit diperkecil agar elegan */
+    font-weight: bold !important;        /* Ubah dari bold tebal ke semi-bold */
+    color: var(--text-muted) !important;/* Pakai warna latte/abu kecokelatan biar estetik */
+    margin-bottom: 6px !important;      /* Jarak tipis ke kotak input di bawahnya */
+}
+
+.login-form-side .login-icon {
+    font-size: 2.5rem; /* Bikin gemboknya lebih besar */
+    margin-bottom: 15px; /* Beri jarak ke bawah (ke judul h2) */
+    display: block;
+}
+
+/* 2. Mengatur teks judul h2 */
+.login-form-side h2 {
+    color: var(--primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 10px; /* Beri jarak ke bawah (ke teks paragraf p) */
+}
+
+/* 3. Mengatur teks deskripsi p agar tidak terlalu lebar & punya jarak ke form input */
+.login-form-side p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 320px; /* Biar teksnya memotong rapi ke bawah, ga melar ke samping */
+    margin: 0 auto 35px auto; /* Memberikan space kosong yang pas sebelum masuk ke input form */
 }
 
 @media (max-width: 768px) {
