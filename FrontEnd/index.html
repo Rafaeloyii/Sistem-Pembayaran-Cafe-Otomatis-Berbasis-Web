@@ -1,11 +1,371 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sistem Pemesanan - Cafe CP 55</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Container Grafik Tren Harian */
+        .daily-chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .daily-chart-row {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .daily-chart-date {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .daily-bar-wrapper {
+            display: grid;
+            grid-template-columns: 80px 1fr 100px;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .daily-bar-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .daily-bar-track {
+            background: #e9ecef;
+            height: 14px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .daily-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .daily-bar-val {
+            font-size: 0.8rem;
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
 </head>
-<body>
+<body class="pos-layout-active"> 
+    <div class="app-wrapper">
+        
+        <aside id="app-sidebar" class="sidebar" style="display: none;">
+            <div class="sidebar-brand">
+                <h2>Cafe CP 55</h2>
+                <span class="role-badge" id="current-role">Guest</span>
+            </div>
+            
+            <nav class="sidebar-menu" id="sidebar-menu-items"></nav>
 
+            <div class="sidebar-footer">
+                <button class="btn-logout-sidebar" onclick="logout()">Logout 🚪</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="mobile-topbar">
+                <button class="hamburger-btn" onclick="toggleSidebar()">☰ Menu</button>
+                <h2 style="margin: 0; font-size: 1.2rem; color: var(--primary);">Cafe CP 55</h2>
+            </div>
+
+            <div id="page-pembeli" class="page active">
+                <div class="pembeli-header">
+                    <div class="header-titles">
+                        <h1>Cafe CP 55 ☕</h1>
+                        <p>Pelayanan Sat-Set, Cita Rasa Mantap!</p>
+                    </div>
+                    <button class="btn-login-trigger" onclick="switchTab('login')">Akses Staf 🔑</button>
+                </div>
+                
+                <div class="pos-grid">
+                    <div class="menu-section">
+                        <div class="category-tabs">
+                            <button class="cat-btn active" onclick="filterCategory('Semua', this)">Semua Menu</button>
+                            <button class="cat-btn" onclick="filterCategory('Makanan', this)">Makanan</button>
+                            <button class="cat-btn" onclick="filterCategory('Minuman', this)">Minuman</button>
+                            <button class="cat-btn" onclick="filterCategory('Snack', this)">Snack</button>
+                        </div>
+                        <div class="menu-grid" id="pos-menu-render"></div>
+                    </div>
+
+                    <div class="cart-section">
+                        <div class="cart-header-tabs">
+                            <button id="cart-tab-list" class="cart-tab-btn active" onclick="switchCartSubTab('list')">🛒 Detail Order</button>
+                            <button id="cart-tab-pay" class="cart-tab-btn" onclick="switchCartSubTab('pay')">💳 Pembayaran</button>
+                        </div>
+
+                        <div id="cart-sub-page-list" class="cart-sub-page active">
+                            <div class="form-group">
+                                <label>Nama Pembeli</label>
+                                <input type="text" id="cart-customer-name" class="form-control" placeholder="Tulis nama Anda...">
+                            </div>
+                            
+                            <div id="cart-items-list" class="cart-items-container"></div>
+
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>Catatan Tambahan</label>
+                                <input type="text" id="cart-cashier-notes" class="form-control" placeholder="Contoh: Es teh manis plastik, mi pedas...">
+                            </div>
+
+                            <div class="cart-summary-mini">
+                                <span>Estimasi:</span>
+                                <span id="cart-mini-total" style="font-weight: 700; color: var(--secondary);">Rp 0</span>
+                            </div>
+
+                            <button class="btn-block btn-next-pay" onclick="goToPaymentTab()">Lanjut ke Pembayaran ➡️</button>
+                        </div>
+
+                        <div id="cart-sub-page-pay" class="cart-sub-page">
+                            <div class="form-group">
+                                <label>Pilih Metode Pembayaran</label>
+                                <div class="payment-method-selector">
+                                    <button type="button" id="pay-btn-cash" class="pay-method-btn active" onclick="selectPaymentMethod('cash')">
+                                        <span class="pay-icon">💵</span> Cash
+                                    </button>
+                                    <button type="button" id="pay-btn-qris" class="pay-method-btn" onclick="selectPaymentMethod('qris')">
+                                        <span class="pay-icon">📱</span> QRIS
+                                    </button>
+                                </div>
+                                <input type="hidden" id="cart-payment-method" value="cash">
+                            </div>
+
+                            <div id="qris-payment-box" style="display: none;">
+                                <div class="qris-card">
+                                    <img src="qr-warkop.jpeg" alt="QRIS Cafe CP 55">
+                                    <p>Silakan pindai kode QR di atas untuk menyelesaikan pembayaran digital.</p>
+                                </div>
+                            </div>
+
+                            <div class="cart-total">
+                                <span>Total Pembayaran:</span>
+                                <span id="cart-grand-total">Rp 0</span>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn-block" style="background: #e2e8f0; color: var(--text); flex: 1; padding: 10px;" onclick="switchCartSubTab('list')">⬅️ Kembali</button>
+                                <button class="btn-block btn-checkout" style="flex: 2; margin-top: 0;" onclick="checkoutOrder()">Kirim Pesanan 🚀</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-login" class="page">
+                <div class="login-split-container">
+                    <div class="login-image-side"></div>
+                    <div class="login-form-side">
+                        <div class="card" style="max-width: 400px; margin: auto; width: 100%;">
+                            <div class="login-icon">🔐</div>
+                            <h2 style="margin-bottom: 5px; color: var(--primary);">Login Sistem</h2>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Kelola operasional dan keuangan cafe</p>
+                            
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="username" class="form-control" placeholder="Masukkan username">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="password" class="form-control" placeholder="Masukkan password">
+                            </div>
+                            
+                            <button class="btn-block btn-login-action" onclick="login()">Verifikasi Masuk</button>
+                            <button class="btn-block btn-back-action" style="margin-top: 10px;" onclick="switchTab('pembeli')">Kembali ke Menu Utama</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-status" class="page">
+                <div class="dashboard-header-bar">
+                    <h3>🍳 Panel Monitor Aktivitas Dapur Kasir</h3>
+                    <button class="btn-login-trigger" style="background: var(--primary); color: white;" onclick="backToPembeli()">Keluar Sistem 🚪</button>
+                </div>
+                <div class="kitchen-container" id="kitchen-cards-render"></div>
+            </div>
+
+            <div id="page-history" class="page">
+                <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                    <h3>📄 Daftar Riwayat Seluruh Transaksi Nota</h3>
+                    <div style="overflow-x: auto; flex: 1; margin-top: 15px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID Nota</th>
+                                    <th>Waktu Transaksi</th>
+                                    <th>Nama Pelanggan</th>
+                                    <th>Item Belanjaan</th>
+                                    <th>Total Bayar</th>
+                                    <th>Metode</th>
+                                    <th>Status Pesanan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-history-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-owner-summary" class="page">
+                <div class="owner-stats-row">
+                    <div class="stat-box box-revenue">
+                        <h4>Total Omset / Pendapatan Kotor</h4>
+                        <div class="num" id="stat-revenue">Rp 0</div>
+                    </div>
+                    <div class="stat-box box-expense">
+                        <h4>Total Pengeluaran Logistik</h4>
+                        <div class="num" id="stat-expenses">Rp 0</div>
+                    </div>
+                    <div class="stat-box box-profit">
+                        <h4>Estimasi Keuntungan Bersih</h4>
+                        <div class="num" id="stat-profit">Rp 0</div>
+                    </div>
+                </div>
+                <div class="grid-summary-charts" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
+                    <div class="card">
+                        <h3>📈 Tren Pendapatan Bersih (Harian)</h3>
+                        <div class="daily-chart-container" id="chart-daily-render"></div>
+                    </div>
+                    <div class="card">
+                        <h3>🏆 Produk Terlaris (Grafik Kuantitas)</h3>
+                        <div class="daily-chart-container" id="chart-best-render"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-owner-recap" class="page">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3>📅 Laporan Rekapitulasi Keuangan Siklus Bulanan</h3>
+                        <button class="btn-block btn-next-pay" style="width: auto; margin: 0; padding: 10px 20px;" onclick="downloadRecapCSV()">Ekspor Data (.CSV) 📊</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hari & Tanggal</th>
+                                    <th>Pemasukan Kotor (Rp)</th>
+                                    <th>Pengeluaran Operasional (Rp)</th>
+                                    <th>Pendapatan Bersih (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-recap-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-owner-expense" class="page">
+                <div class="card">
+                    <h3>Formulir Pencatatan Pengeluaran Operasional</h3>
+                    <div class="form-inline-row">
+                        <div class="form-group flex-2">
+                            <label>Nama Keperluan / Pembelian Barang</label>
+                            <input type="text" id="expense-name" class="form-control" placeholder="Contoh: Beli Token Listrik, Es Batu, dll">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Nominal Pengeluaran (Rp)</label>
+                            <input type="number" id="expense-amount" class="form-control" placeholder="Contoh: 50000">
+                        </div>
+                        <div class="form-group btn-align-bottom">
+                            <button class="btn-block btn-next-pay" onclick="submitExpenseByOwner()">Simpan Catatan 💾</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 10px;">
+                    <div>
+                        <h3>Daftar Pengeluaran Tercatat</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Riwayat pengeluaran operasional warung secara real-time.</p>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal & Waktu</th>
+                                    <th>Nama Pengeluaran / Keperluan</th>
+                                    <th>Nominal (Rupiah)</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-expense-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-owner-addmenu" class="page">
+                <div class="card">
+                    <h3>Tambah Variasi Menu Baru Cafe</h3>
+                    <div class="form-inline-row">
+                        <div class="form-group flex-2">
+                            <label>Nama Varian Menu Baru</label>
+                            <input type="text" id="new-menu-name" class="form-control" placeholder="Contoh: Es Kopi Susu Gula Aren">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Kategori Menu</label>
+                            <select id="new-menu-category" class="form-control">
+                                <option value="Minuman">Minuman</option>
+                                <option value="Makanan">Makanan</option>
+                                <option value="Snack">Snack</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Harga Jual (Rp)</label>
+                            <input type="number" id="new-menu-price" class="form-control" placeholder="Contoh: 15000">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Pasokan Stok Awal</label>
+                            <input type="number" id="new-menu-stock" class="form-control" placeholder="Contoh: 50">
+                        </div>
+                        <div class="form-group btn-align-bottom">
+                            <button class="btn-block btn-next-pay" onclick="addNewMenuByOwner()">+ Tambah Menu Baru</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-owner-stock" class="page">
+                <div class="card">
+                    <h3>Manajemen Suplai Stok Bahan Baku</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Menu / Bahan</th>
+                                    <th>Kategori</th>
+                                    <th>Harga</th>
+                                    <th>Stok Tersedia</th>
+                                    <th>Aksi Tambah Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-stock-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modal-receipt" class="modal">
+        <div class="modal-content receipt-modal-box">
+            <div class="digital-receipt-wrapper" id="receipt-print-area"></div>
+            <button class="btn-block btn-close-receipt" onclick="closeReceiptModal()">Tutup & Selesai</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
